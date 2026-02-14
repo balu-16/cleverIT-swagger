@@ -533,18 +533,18 @@
         "parameters": [
           {
             "name": "page",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           },
           {
             "name": "limit",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           }
         ],
@@ -570,18 +570,18 @@
         "parameters": [
           {
             "name": "page",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           },
           {
             "name": "limit",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           }
         ],
@@ -923,18 +923,18 @@
         "parameters": [
           {
             "name": "page",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           },
           {
             "name": "limit",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           }
         ],
@@ -1012,7 +1012,7 @@
     "/api/blood-requests/{id}/help": {
       "post": {
         "operationId": "BloodRequestsController_help",
-        "summary": "Help a blood request \u2014 reveals contact details (logged)",
+        "summary": "Help a blood request — reveals contact details (logged)",
         "parameters": [
           {
             "name": "id",
@@ -1731,6 +1731,306 @@
           }
         ]
       }
+    },
+    "/api/admin/users": {
+      "get": {
+        "operationId": "AdminController_listUsers",
+        "summary": "List users (admin only)",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountStatus",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "active",
+                "inactive",
+                "deleted"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "user",
+                "admin"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/users/{id}/profile": {
+      "get": {
+        "operationId": "AdminController_getUserProfile",
+        "summary": "Get user profile (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/users/{id}/activity/summary": {
+      "get": {
+        "operationId": "AdminController_getUserActivitySummary",
+        "summary": "Get user activity summary (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/users/{id}/activity/login-logs": {
+      "get": {
+        "operationId": "AdminController_getUserLoginLogs",
+        "summary": "Get user login logs (admin only, read-only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/users/{id}/activity/schedules": {
+      "get": {
+        "operationId": "AdminController_getUserSchedules",
+        "summary": "Get user schedules (tasks + events) (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/users/{id}/activity/blood": {
+      "get": {
+        "operationId": "AdminController_getUserBloodActivity",
+        "summary": "Get user blood activity (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/users/{id}/activity/chat-participants": {
+      "get": {
+        "operationId": "AdminController_getUserChatParticipants",
+        "summary": "Get user chat participant metadata only (no chat content) (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
     }
   },
   "info": {
@@ -1779,6 +2079,10 @@
     {
       "name": "badges",
       "description": "Badge and reputation system"
+    },
+    {
+      "name": "admin",
+      "description": "Admin oversight and monitoring endpoints"
     }
   ],
   "servers": [],
