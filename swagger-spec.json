@@ -1,0 +1,2479 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "AppController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/send-otp": {
+      "post": {
+        "operationId": "AuthController_sendOtp",
+        "summary": "Send OTP to phone number",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendOtpDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/verify-otp": {
+      "post": {
+        "operationId": "AuthController_verifyOtp",
+        "summary": "Verify OTP and login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyOtpDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/signup": {
+      "post": {
+        "operationId": "AuthController_signup",
+        "summary": "Sign up new user",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "operationId": "AuthController_getProfile",
+        "summary": "Get current user profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "summary": "Logout and invalidate current token",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "operationId": "UsersController_getMyProfile",
+        "summary": "Get current authenticated user profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_deleteAccount",
+        "summary": "Delete account (anonymize + soft-delete)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "summary": "Get user by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_update",
+        "summary": "Update user profile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/users/deactivate": {
+      "post": {
+        "operationId": "UsersController_deactivate",
+        "summary": "Deactivate current user account",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/users/reactivate": {
+      "post": {
+        "operationId": "UsersController_reactivate",
+        "summary": "Reactivate current user account",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/users/me/caller-id-opt-out": {
+      "patch": {
+        "operationId": "UsersController_toggleCallerIdOptOut",
+        "summary": "Toggle caller-ID visibility opt-out",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/contacts/upload": {
+      "post": {
+        "operationId": "ContactsController_uploadContacts",
+        "summary": "Upload contact intelligence (consent required)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadContactsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "contacts"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/contacts/consent": {
+      "post": {
+        "operationId": "ContactsController_grantConsent",
+        "summary": "Grant contact sharing consent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantConsentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "contacts"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "ContactsController_revokeConsent",
+        "summary": "Revoke contact sharing consent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeConsentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "contacts"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/contacts/consent/status": {
+      "get": {
+        "operationId": "ContactsController_getConsentStatus",
+        "summary": "Check current consent status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "contacts"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/caller-id/resolve/{phone}": {
+      "get": {
+        "operationId": "CallerIdController_resolve",
+        "summary": "Resolve phone number to display name",
+        "parameters": [
+          {
+            "name": "phone",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "caller-id"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/caller-id/resolve/batch": {
+      "post": {
+        "operationId": "CallerIdController_resolveBatch",
+        "summary": "Batch resolve phone numbers (max 50)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchResolveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "caller-id"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/qr/me": {
+      "get": {
+        "operationId": "QrController_getMyQr",
+        "summary": "Get own QR token and public profile preview",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "qr"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/qr/resolve/{token}": {
+      "get": {
+        "operationId": "QrController_resolveQr",
+        "summary": "Resolve QR token to public user profile",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "qr"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/tasks": {
+      "post": {
+        "operationId": "TasksController_create",
+        "summary": "Create a new task",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "tasks"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "TasksController_findAll",
+        "summary": "List tasks with filters",
+        "parameters": [
+          {
+            "name": "view",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "today",
+                "upcoming",
+                "completed",
+                "overdue"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "pending",
+                "in_progress",
+                "completed",
+                "cancelled"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "work",
+                "personal",
+                "health",
+                "finance",
+                "education",
+                "other"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "priority",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "urgent"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "tasks"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/tasks/{id}": {
+      "get": {
+        "operationId": "TasksController_findOne",
+        "summary": "Get a single task by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "tasks"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "TasksController_update",
+        "summary": "Update a task",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "tasks"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "TasksController_remove",
+        "summary": "Soft-delete a task",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "tasks"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/tasks/{id}/complete": {
+      "patch": {
+        "operationId": "TasksController_complete",
+        "summary": "Mark task as completed",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "tasks"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/events": {
+      "post": {
+        "operationId": "EventsController_create",
+        "summary": "Create a new event",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "events"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "EventsController_findAll",
+        "summary": "List events with filters",
+        "parameters": [
+          {
+            "name": "view",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "today",
+                "upcoming",
+                "past",
+                "week",
+                "month"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "eventType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "personal",
+                "work",
+                "social",
+                "health",
+                "other"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "events"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/events/{id}": {
+      "get": {
+        "operationId": "EventsController_findOne",
+        "summary": "Get a single event by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "events"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "EventsController_update",
+        "summary": "Update an event",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "events"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "EventsController_remove",
+        "summary": "Soft-delete an event",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "events"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-camps": {
+      "post": {
+        "operationId": "BloodCampsController_create",
+        "summary": "Create a blood donation camp",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCampDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-camps"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "BloodCampsController_findAll",
+        "summary": "List all blood camps (filters: status, city, bloodGroup)",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "upcoming",
+                "active",
+                "completed",
+                "cancelled"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bloodGroup",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-camps"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-camps/nearby": {
+      "get": {
+        "operationId": "BloodCampsController_findNearby",
+        "summary": "List nearby blood camps (geospatial)",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "radiusKm",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-camps"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-camps/my/organized": {
+      "get": {
+        "operationId": "BloodCampsController_findMyOrganized",
+        "summary": "List camps I organized",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-camps"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-camps/my/registered": {
+      "get": {
+        "operationId": "BloodCampsController_findMyRegistrations",
+        "summary": "List camps I registered for",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-camps"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-camps/{id}": {
+      "get": {
+        "operationId": "BloodCampsController_findOne",
+        "summary": "Get blood camp details",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-camps"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "BloodCampsController_update",
+        "summary": "Update blood camp (organizer only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCampDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-camps"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-camps/{id}/publish": {
+      "patch": {
+        "operationId": "BloodCampsController_togglePublish",
+        "summary": "Publish or unpublish a camp (organizer only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-camps"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-camps/{id}/register": {
+      "post": {
+        "operationId": "BloodCampsController_register",
+        "summary": "Register for a blood camp",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-camps"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "BloodCampsController_cancelRegistration",
+        "summary": "Cancel camp registration",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-camps"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/badges/my": {
+      "get": {
+        "operationId": "BadgesController_getMyBadges",
+        "summary": "Get all my badges",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "badges"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/badges/definitions": {
+      "get": {
+        "operationId": "BadgesController_getDefinitions",
+        "summary": "List all possible badge definitions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "badges"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/badges/user/{userId}": {
+      "get": {
+        "operationId": "BadgesController_getUserBadges",
+        "summary": "Get another user's badges (public)",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "badges"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-requests": {
+      "post": {
+        "operationId": "BloodRequestsController_create",
+        "summary": "Create a blood request",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBloodRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-requests"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "BloodRequestsController_findAll",
+        "summary": "List blood requests (contact details hidden)",
+        "parameters": [
+          {
+            "name": "bloodGroup",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "urgency",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "normal",
+                "urgent",
+                "critical"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-requests"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-requests/nearby": {
+      "get": {
+        "operationId": "BloodRequestsController_findNearby",
+        "summary": "List nearby blood requests (geospatial, contact hidden)",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "radiusKm",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-requests"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-requests/my": {
+      "get": {
+        "operationId": "BloodRequestsController_findMyRequests",
+        "summary": "List my blood requests (includes contact details)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-requests"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-requests/{id}": {
+      "get": {
+        "operationId": "BloodRequestsController_findOne",
+        "summary": "Get blood request details (contact details hidden)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-requests"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "BloodRequestsController_cancel",
+        "summary": "Cancel blood request (owner only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-requests"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-requests/{id}/help": {
+      "post": {
+        "operationId": "BloodRequestsController_help",
+        "summary": "Help a blood request \u2014 reveals contact details (logged)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-requests"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/blood-requests/{id}/fulfill": {
+      "patch": {
+        "operationId": "BloodRequestsController_fulfill",
+        "summary": "Mark blood request as fulfilled (owner only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "blood-requests"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "NighaTech API",
+    "description": "NighaTech Mobile App Authentication Backend API",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Authentication endpoints"
+    },
+    {
+      "name": "users",
+      "description": "User management endpoints"
+    },
+    {
+      "name": "contacts",
+      "description": "Contact intelligence ingestion"
+    },
+    {
+      "name": "caller-id",
+      "description": "Caller identity resolution"
+    },
+    {
+      "name": "qr",
+      "description": "QR identity system"
+    },
+    {
+      "name": "tasks",
+      "description": "Personal task management"
+    },
+    {
+      "name": "events",
+      "description": "Calendar schedules and events"
+    },
+    {
+      "name": "blood-camps",
+      "description": "Blood donation camp management"
+    },
+    {
+      "name": "blood-requests",
+      "description": "Blood request and help system"
+    },
+    {
+      "name": "badges",
+      "description": "Badge and reputation system"
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://clever-it-kcwe.vercel.app",
+      "description": "Production"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "SendOtpDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "9876543210"
+          }
+        },
+        "required": [
+          "phone"
+        ]
+      },
+      "VerifyOtpDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "9876543210"
+          },
+          "otp": {
+            "type": "string",
+            "example": "123456"
+          }
+        },
+        "required": [
+          "phone",
+          "otp"
+        ]
+      },
+      "SignupAddressDto": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "example": "123 Main Street"
+          },
+          "city": {
+            "type": "string",
+            "example": "Chennai"
+          },
+          "state": {
+            "type": "string",
+            "example": "Tamil Nadu"
+          },
+          "pinCode": {
+            "type": "string",
+            "example": "600001"
+          }
+        },
+        "required": [
+          "street",
+          "city",
+          "state",
+          "pinCode"
+        ]
+      },
+      "SignupDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Rajesh Kumar"
+          },
+          "email": {
+            "type": "string",
+            "example": "rajesh@example.com"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "example": "1995-06-15"
+          },
+          "gender": {
+            "type": "string",
+            "example": "male",
+            "enum": [
+              "male",
+              "female",
+              "other"
+            ]
+          },
+          "phone": {
+            "type": "string",
+            "example": "9876543210"
+          },
+          "otp": {
+            "type": "string",
+            "example": "123456"
+          },
+          "address": {
+            "$ref": "#/components/schemas/SignupAddressDto"
+          }
+        },
+        "required": [
+          "fullName",
+          "email",
+          "dateOfBirth",
+          "gender",
+          "phone",
+          "otp",
+          "address"
+        ]
+      },
+      "UpdateAddressDto": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "example": "123 Main Street"
+          },
+          "city": {
+            "type": "string",
+            "example": "Chennai"
+          },
+          "state": {
+            "type": "string",
+            "example": "Tamil Nadu"
+          },
+          "pinCode": {
+            "type": "string",
+            "example": "600001"
+          }
+        }
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Rajesh Kumar"
+          },
+          "email": {
+            "type": "string",
+            "example": "rajesh@example.com"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "example": "1995-06-15"
+          },
+          "gender": {
+            "type": "string",
+            "example": "male",
+            "enum": [
+              "male",
+              "female",
+              "other"
+            ]
+          },
+          "address": {
+            "$ref": "#/components/schemas/UpdateAddressDto"
+          },
+          "optOutCallerIdentity": {
+            "type": "boolean",
+            "example": false
+          },
+          "contactSharingConsent": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "ContactEntryDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "9876543210"
+          },
+          "name": {
+            "type": "string",
+            "example": "Rajesh Kumar"
+          }
+        },
+        "required": [
+          "phone",
+          "name"
+        ]
+      },
+      "UploadContactsDto": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "contacts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContactEntryDto"
+            }
+          }
+        },
+        "required": [
+          "batchId",
+          "contacts"
+        ]
+      },
+      "GrantConsentDto": {
+        "type": "object",
+        "properties": {
+          "consentType": {
+            "type": "string",
+            "example": "contact_upload",
+            "enum": [
+              "contact_upload",
+              "caller_id_visible"
+            ]
+          },
+          "consentVersion": {
+            "type": "string",
+            "example": "1.0"
+          }
+        },
+        "required": [
+          "consentType",
+          "consentVersion"
+        ]
+      },
+      "RevokeConsentDto": {
+        "type": "object",
+        "properties": {
+          "consentType": {
+            "type": "string",
+            "example": "contact_upload",
+            "enum": [
+              "contact_upload",
+              "caller_id_visible"
+            ]
+          }
+        },
+        "required": [
+          "consentType"
+        ]
+      },
+      "BatchResolveDto": {
+        "type": "object",
+        "properties": {
+          "phones": {
+            "example": [
+              "9876543210",
+              "8765432109"
+            ],
+            "description": "Array of phone numbers to resolve (max 50)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "phones"
+        ]
+      },
+      "CreateTaskDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Review quarterly report"
+          },
+          "description": {
+            "type": "string",
+            "example": "Review and approve the Q1 financial report"
+          },
+          "category": {
+            "type": "string",
+            "example": "work",
+            "enum": [
+              "work",
+              "personal",
+              "health",
+              "finance",
+              "education",
+              "other"
+            ]
+          },
+          "priority": {
+            "type": "string",
+            "example": "high",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "urgent"
+            ]
+          },
+          "dueDate": {
+            "type": "string",
+            "example": "2026-02-20T10:00:00.000Z"
+          },
+          "reminderAt": {
+            "type": "string",
+            "example": "2026-02-20T09:00:00.000Z"
+          },
+          "tags": {
+            "example": [
+              "urgent",
+              "q1"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "UpdateTaskDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Updated task title"
+          },
+          "description": {
+            "type": "string",
+            "example": "Updated description"
+          },
+          "category": {
+            "type": "string",
+            "example": "work",
+            "enum": [
+              "work",
+              "personal",
+              "health",
+              "finance",
+              "education",
+              "other"
+            ]
+          },
+          "priority": {
+            "type": "string",
+            "example": "high",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "urgent"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "example": "in_progress",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "dueDate": {
+            "type": "string",
+            "example": "2026-02-20T10:00:00.000Z"
+          },
+          "reminderAt": {
+            "type": "string",
+            "example": "2026-02-20T09:00:00.000Z"
+          },
+          "tags": {
+            "example": [
+              "urgent",
+              "q1"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CreateEventDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Team standup meeting"
+          },
+          "description": {
+            "type": "string",
+            "example": "Daily sync with the engineering team"
+          },
+          "eventType": {
+            "type": "string",
+            "example": "work",
+            "enum": [
+              "personal",
+              "work",
+              "social",
+              "health",
+              "other"
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "example": "private",
+            "enum": [
+              "private",
+              "public"
+            ]
+          },
+          "startTime": {
+            "type": "string",
+            "example": "2026-02-20T10:00:00.000Z"
+          },
+          "endTime": {
+            "type": "string",
+            "example": "2026-02-20T11:00:00.000Z"
+          },
+          "allDay": {
+            "type": "boolean",
+            "example": false
+          },
+          "location": {
+            "type": "string",
+            "example": "Conference Room A"
+          },
+          "color": {
+            "type": "string",
+            "example": "#4A90D9"
+          }
+        },
+        "required": [
+          "title",
+          "startTime",
+          "endTime"
+        ]
+      },
+      "UpdateEventDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Updated meeting title"
+          },
+          "description": {
+            "type": "string",
+            "example": "Updated description"
+          },
+          "eventType": {
+            "type": "string",
+            "example": "work",
+            "enum": [
+              "personal",
+              "work",
+              "social",
+              "health",
+              "other"
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "example": "private",
+            "enum": [
+              "private",
+              "public"
+            ]
+          },
+          "startTime": {
+            "type": "string",
+            "example": "2026-02-20T10:00:00.000Z"
+          },
+          "endTime": {
+            "type": "string",
+            "example": "2026-02-20T11:00:00.000Z"
+          },
+          "allDay": {
+            "type": "boolean",
+            "example": false
+          },
+          "location": {
+            "type": "string",
+            "example": "Conference Room B"
+          },
+          "color": {
+            "type": "string",
+            "example": "#4A90D9"
+          }
+        }
+      },
+      "CreateCampDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "City Blood Drive 2026"
+          },
+          "description": {
+            "type": "string",
+            "example": "Annual blood donation camp organized by Red Cross"
+          },
+          "organizerName": {
+            "type": "string",
+            "example": "Dr. Rajesh Kumar"
+          },
+          "organizerPhone": {
+            "type": "string",
+            "example": "9876543210"
+          },
+          "longitude": {
+            "type": "number",
+            "example": 80.2707,
+            "description": "Longitude"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 13.0827,
+            "description": "Latitude"
+          },
+          "locationText": {
+            "type": "string",
+            "example": "Apollo Hospital, Greams Road, Chennai"
+          },
+          "city": {
+            "type": "string",
+            "example": "Chennai"
+          },
+          "state": {
+            "type": "string",
+            "example": "Tamil Nadu"
+          },
+          "startTime": {
+            "type": "string",
+            "example": "2026-03-01T09:00:00.000Z"
+          },
+          "endTime": {
+            "type": "string",
+            "example": "2026-03-01T17:00:00.000Z"
+          },
+          "registrationDeadline": {
+            "type": "string",
+            "example": "2026-02-28T23:59:59.000Z"
+          },
+          "bloodGroupsNeeded": {
+            "type": "string",
+            "example": [
+              "A+",
+              "B+",
+              "O+",
+              "O-"
+            ],
+            "enum": [
+              "A+",
+              "A-",
+              "B+",
+              "B-",
+              "AB+",
+              "AB-",
+              "O+",
+              "O-"
+            ]
+          },
+          "capacity": {
+            "type": "number",
+            "example": 100
+          }
+        },
+        "required": [
+          "name",
+          "organizerName",
+          "organizerPhone",
+          "longitude",
+          "latitude",
+          "locationText",
+          "city",
+          "state",
+          "startTime",
+          "endTime",
+          "bloodGroupsNeeded"
+        ]
+      },
+      "UpdateCampDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Updated Camp Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Updated description"
+          },
+          "organizerName": {
+            "type": "string",
+            "example": "Dr. Updated Name"
+          },
+          "organizerPhone": {
+            "type": "string",
+            "example": "9876543210"
+          },
+          "longitude": {
+            "type": "number",
+            "example": 80.2707
+          },
+          "latitude": {
+            "type": "number",
+            "example": 13.0827
+          },
+          "locationText": {
+            "type": "string",
+            "example": "Updated location"
+          },
+          "city": {
+            "type": "string",
+            "example": "Chennai"
+          },
+          "state": {
+            "type": "string",
+            "example": "Tamil Nadu"
+          },
+          "startTime": {
+            "type": "string",
+            "example": "2026-03-01T09:00:00.000Z"
+          },
+          "endTime": {
+            "type": "string",
+            "example": "2026-03-01T17:00:00.000Z"
+          },
+          "registrationDeadline": {
+            "type": "string",
+            "example": "2026-02-28T23:59:59.000Z"
+          },
+          "bloodGroupsNeeded": {
+            "example": [
+              "A+",
+              "O+"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "capacity": {
+            "type": "number",
+            "example": 200
+          },
+          "status": {
+            "type": "string",
+            "example": "upcoming",
+            "enum": [
+              "upcoming",
+              "active",
+              "completed",
+              "cancelled"
+            ]
+          }
+        }
+      },
+      "CreateBloodRequestDto": {
+        "type": "object",
+        "properties": {
+          "patientName": {
+            "type": "string",
+            "example": "Rajesh Kumar"
+          },
+          "bloodGroup": {
+            "type": "string",
+            "example": "O+",
+            "enum": [
+              "A+",
+              "A-",
+              "B+",
+              "B-",
+              "AB+",
+              "AB-",
+              "O+",
+              "O-"
+            ]
+          },
+          "unitsNeeded": {
+            "type": "number",
+            "example": 2
+          },
+          "urgency": {
+            "type": "string",
+            "example": "urgent",
+            "enum": [
+              "normal",
+              "urgent",
+              "critical"
+            ]
+          },
+          "longitude": {
+            "type": "number",
+            "example": 80.2707,
+            "description": "Longitude"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 13.0827,
+            "description": "Latitude"
+          },
+          "locationText": {
+            "type": "string",
+            "example": "Apollo Hospital, Greams Road, Chennai"
+          },
+          "city": {
+            "type": "string",
+            "example": "Chennai"
+          },
+          "hospital": {
+            "type": "string",
+            "example": "Apollo Hospital"
+          },
+          "contactPhone": {
+            "type": "string",
+            "example": "9876543210"
+          },
+          "contactName": {
+            "type": "string",
+            "example": "Rajesh Kumar"
+          },
+          "description": {
+            "type": "string",
+            "example": "Patient needs O+ blood urgently for surgery"
+          }
+        },
+        "required": [
+          "patientName",
+          "bloodGroup",
+          "unitsNeeded",
+          "longitude",
+          "latitude",
+          "locationText",
+          "city",
+          "contactPhone",
+          "contactName"
+        ]
+      }
+    }
+  }
+}

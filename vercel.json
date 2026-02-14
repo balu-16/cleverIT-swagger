@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "headers": {
+        "Cache-Control": "public, max-age=3600",
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
