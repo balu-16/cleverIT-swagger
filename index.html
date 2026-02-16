@@ -13,9 +13,16 @@
   <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
   <script>
     window.onload = () => {
-      const apiBaseUrl = "https://clever-it-hazel.vercel.app";
+      const host = window.location.hostname;
+      const isLocalhost = host === "localhost" || host === "127.0.0.1";
+      const apiBaseUrl = isLocalhost
+        ? "http://localhost:3000"
+        : "https://clever-it-hazel.vercel.app";
+      const specUrl = isLocalhost
+        ? "http://localhost:3000/api/docs-json"
+        : "./swagger.yaml";
       window.ui = SwaggerUIBundle({
-        url: "./swagger-spec.json",
+        url: specUrl,
         dom_id: "#swagger-ui",
         deepLinking: false,
         presets: [
