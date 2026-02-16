@@ -1032,7 +1032,7 @@
     "/api/blood-requests/{id}/help": {
       "post": {
         "operationId": "BloodRequestsController_help",
-        "summary": "Help a blood request \u2014 reveals contact details (logged)",
+        "summary": "Help a blood request — reveals contact details (logged)",
         "parameters": [
           {
             "name": "id",
@@ -5211,7 +5211,16 @@
       "description": "Personal mode blood donation and emergency endpoints"
     }
   ],
-  "servers": [],
+  "servers": [
+    {
+      "url": "https://clever-it-hazel.vercel.app",
+      "description": "Production backend"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Local backend"
+    }
+  ],
   "components": {
     "securitySchemes": {
       "bearer": {
