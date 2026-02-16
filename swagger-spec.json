@@ -231,6 +231,26 @@
         ]
       }
     },
+    "/api/users/me/profile-image": {
+      "patch": {
+        "operationId": "UsersController_updateProfileImage",
+        "summary": "Upload or replace current user profile image",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/users/deactivate": {
       "post": {
         "operationId": "UsersController_deactivate",
@@ -1012,7 +1032,7 @@
     "/api/blood-requests/{id}/help": {
       "post": {
         "operationId": "BloodRequestsController_help",
-        "summary": "Help a blood request — reveals contact details (logged)",
+        "summary": "Help a blood request \u2014 reveals contact details (logged)",
         "parameters": [
           {
             "name": "id",
@@ -1059,6 +1079,55 @@
         },
         "tags": [
           "blood-requests"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/qr/me": {
+      "get": {
+        "operationId": "QrController_getMyQr",
+        "summary": "Get own QR token and public profile preview",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "qr"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/qr/resolve/{token}": {
+      "get": {
+        "operationId": "QrController_resolveQr",
+        "summary": "Resolve QR token to public user profile",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "qr"
         ],
         "security": [
           {
@@ -1226,55 +1295,6 @@
         },
         "tags": [
           "caller-id"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/api/qr/me": {
-      "get": {
-        "operationId": "QrController_getMyQr",
-        "summary": "Get own QR token and public profile preview",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "qr"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/api/qr/resolve/{token}": {
-      "get": {
-        "operationId": "QrController_resolveQr",
-        "summary": "Resolve QR token to public user profile",
-        "parameters": [
-          {
-            "name": "token",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "qr"
         ],
         "security": [
           {
@@ -2031,6 +2051,3032 @@
           }
         ]
       }
+    },
+    "/api/admin/notifications/templates": {
+      "post": {
+        "operationId": "AdminNotificationsController_createTemplate",
+        "summary": "Create a predefined notification template (admin only)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationTemplateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin-notifications"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "AdminNotificationsController_listTemplates",
+        "summary": "List predefined notification templates (admin only)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin-notifications"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/notifications/jobs": {
+      "post": {
+        "operationId": "AdminNotificationsController_createJob",
+        "summary": "Create notification job (immediate or scheduled) (admin only)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationJobDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin-notifications"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "AdminNotificationsController_listJobs",
+        "summary": "List notification job history (admin only)",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "SCHEDULED",
+                "SENT",
+                "FAILED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin-notifications"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/notifications/jobs/{jobId}/schedule": {
+      "patch": {
+        "operationId": "AdminNotificationsController_scheduleJob",
+        "summary": "Schedule an existing notification job for future dispatch (admin only)",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleNotificationJobDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin-notifications"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/notifications/jobs/{jobId}/trigger": {
+      "post": {
+        "operationId": "AdminNotificationsController_triggerJobNow",
+        "summary": "Trigger an existing notification job immediately (admin only)",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin-notifications"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/push/vapid-public-key": {
+      "get": {
+        "operationId": "PushController_getVapidPublicKey",
+        "summary": "Get VAPID public key for push subscription",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns VAPID public key"
+          }
+        },
+        "tags": [
+          "push"
+        ]
+      }
+    },
+    "/api/push/subscribe": {
+      "post": {
+        "operationId": "PushController_subscribe",
+        "summary": "Subscribe to push notifications",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subscription created successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/push/unsubscribe": {
+      "delete": {
+        "operationId": "PushController_unsubscribe",
+        "summary": "Unsubscribe from push notifications",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Subscription removed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/push/unsubscribe-all": {
+      "delete": {
+        "operationId": "PushController_unsubscribeAll",
+        "summary": "Unsubscribe from all push notifications",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All subscriptions removed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/push/subscriptions": {
+      "get": {
+        "operationId": "PushController_getSubscriptions",
+        "summary": "Get all push subscriptions for current user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns list of subscriptions"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/push/onesignal/device": {
+      "post": {
+        "operationId": "PushController_registerOneSignalDevice",
+        "summary": "Register or refresh current OneSignal browser/device mapping",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterOneSignalDeviceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OneSignal device mapping registered"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/push/onesignal/devices": {
+      "get": {
+        "operationId": "PushController_listOneSignalDevices",
+        "summary": "List active OneSignal player/device mappings for current user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns list of OneSignal device mappings"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/push/onesignal/device/{playerId}": {
+      "delete": {
+        "operationId": "PushController_deactivateOneSignalDevice",
+        "summary": "Deactivate OneSignal player/device mapping for current user",
+        "parameters": [
+          {
+            "name": "playerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OneSignal device mapping deactivated"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/push/notify/{userId}": {
+      "post": {
+        "operationId": "PushController_sendNotificationToUser",
+        "summary": "Send push notification to a specific user (Admin only)",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification sent"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          }
+        },
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/push/notify-multiple": {
+      "post": {
+        "operationId": "PushController_sendNotificationToMultiple",
+        "summary": "Send push notification to multiple users (Admin only)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Notifications sent"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          }
+        },
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/push/broadcast": {
+      "post": {
+        "operationId": "PushController_broadcast",
+        "summary": "Broadcast push notification to all users (Admin only)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Broadcast sent"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          }
+        },
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/push/test": {
+      "post": {
+        "operationId": "PushController_sendTestNotification",
+        "summary": "Send a test notification to current user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Test notification sent"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/chat/conversations": {
+      "get": {
+        "operationId": "ChatController_getConversations",
+        "summary": "List current user conversations",
+        "parameters": [
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "ChatController_createConversation",
+        "summary": "Create conversation (direct/group)",
+        "parameters": [
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/chat/conversations/{id}": {
+      "get": {
+        "operationId": "ChatController_getConversation",
+        "summary": "Get one conversation details",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/chat/conversations/direct": {
+      "post": {
+        "operationId": "ChatController_startDirectConversation",
+        "summary": "Find or create direct conversation by participant email",
+        "parameters": [
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/chat/conversations/{id}/messages": {
+      "get": {
+        "operationId": "ChatController_getMessages",
+        "summary": "Get paginated message history",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "before",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/chat/messages": {
+      "post": {
+        "operationId": "ChatController_sendMessage",
+        "summary": "Send message via REST fallback",
+        "parameters": [
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/chat/messages/{id}": {
+      "put": {
+        "operationId": "ChatController_updateMessage",
+        "summary": "Edit a sent message",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "ChatController_deleteMessage",
+        "summary": "Delete a sent message",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/chat/users/search": {
+      "get": {
+        "operationId": "ChatController_searchUsers",
+        "summary": "Search users by display name or email for chat",
+        "parameters": [
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/chat/conversations/{id}/read": {
+      "post": {
+        "operationId": "ChatController_markRead",
+        "summary": "Mark all unread messages in conversation as read",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/profile": {
+      "post": {
+        "operationId": "BusinessProfileController_create",
+        "summary": "Create business profile for authenticated owner",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBusinessDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "BusinessProfileController_getMyBusiness",
+        "summary": "Get current owner business profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "BusinessProfileController_updateMyBusiness",
+        "summary": "Update current owner business profile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBusinessDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/businesses/{id}/verify": {
+      "post": {
+        "operationId": "BusinessAdminController_verifyBusiness",
+        "summary": "Set business verification status (platform admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyBusinessDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/businesses/{id}/approve": {
+      "post": {
+        "operationId": "BusinessAdminController_approveBusiness",
+        "summary": "Approve business (platform admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/businesses/{id}/suspend": {
+      "post": {
+        "operationId": "BusinessAdminController_suspendBusiness",
+        "summary": "Suspend business (platform admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/businesses/{id}/warning": {
+      "post": {
+        "operationId": "BusinessAdminController_sendSuspensionWarning",
+        "summary": "Send business suspension warning (platform admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendBusinessWarningDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/services": {
+      "post": {
+        "operationId": "BusinessServiceCatalogController_create",
+        "summary": "Create service for current business",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBusinessServiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "BusinessServiceCatalogController_list",
+        "summary": "List services for current business",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/services/{serviceId}": {
+      "patch": {
+        "operationId": "BusinessServiceCatalogController_update",
+        "summary": "Update service for current business",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBusinessServiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "BusinessServiceCatalogController_delete",
+        "summary": "Soft-delete service for current business",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/availability": {
+      "get": {
+        "operationId": "BusinessAvailabilityController_getAvailability",
+        "summary": "Get business availability configuration",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-availability"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "put": {
+        "operationId": "BusinessAvailabilityController_updateAvailability",
+        "summary": "Update weekly schedule and exceptions",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBusinessAvailabilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-availability"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/availability/status": {
+      "patch": {
+        "operationId": "BusinessAvailabilityController_updateTemporaryStatus",
+        "summary": "Update temporary business status",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBusinessTemporaryStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-availability"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/communications/logs": {
+      "get": {
+        "operationId": "BusinessCommunicationController_listLogs",
+        "summary": "List business communication logs",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-communications"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/communications/send": {
+      "post": {
+        "operationId": "BusinessCommunicationController_send",
+        "summary": "Send communication to eligible business customers",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendBusinessCommunicationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-communications"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/revenue/summary": {
+      "get": {
+        "operationId": "BusinessRevenueController_getSummary",
+        "summary": "Get business revenue summary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-revenue"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/revenue/appointments/{appointmentId}/payment-status": {
+      "patch": {
+        "operationId": "BusinessRevenueController_updatePaymentStatus",
+        "summary": "Update payment status for appointment revenue tracking",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePaymentStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-revenue"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/analytics": {
+      "get": {
+        "operationId": "BusinessAnalyticsController_getAnalytics",
+        "summary": "Get business operational analytics",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-03-01T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-03-31T23:59:59.999Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-analytics"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/presence/online": {
+      "post": {
+        "operationId": "PresenceController_setOnline",
+        "summary": "Set current user as online",
+        "parameters": [
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "presence"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/presence/offline": {
+      "post": {
+        "operationId": "PresenceController_setOffline",
+        "summary": "Set current user as offline",
+        "parameters": [
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "presence"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/presence/typing": {
+      "post": {
+        "operationId": "PresenceController_setTyping",
+        "summary": "Set typing indicator state for a conversation",
+        "parameters": [
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "presence"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/presence/typing/{conversationId}": {
+      "get": {
+        "operationId": "PresenceController_getTypingUsers",
+        "summary": "Get active typing users in a conversation",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "presence"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/profile/me": {
+      "get": {
+        "operationId": "IdentityController_getMyProfile",
+        "summary": "Get current user personal-mode profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-identity"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "IdentityController_updateMyProfile",
+        "summary": "Partially update current user personal-mode profile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-identity"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/relationships/request": {
+      "post": {
+        "operationId": "RelationshipsController_createRequest",
+        "summary": "Create relationship request",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRelationshipRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-relationships"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/relationships/respond": {
+      "post": {
+        "operationId": "RelationshipsController_respond",
+        "summary": "Respond to pending relationship request",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondRelationshipRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-relationships"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/relationships/block": {
+      "patch": {
+        "operationId": "RelationshipsController_block",
+        "summary": "Block relationship",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockRelationshipDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-relationships"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/relationships/unblock": {
+      "patch": {
+        "operationId": "RelationshipsController_unblock",
+        "summary": "Unblock relationship",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockRelationshipDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-relationships"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/relationships/tag": {
+      "patch": {
+        "operationId": "RelationshipsController_updateTag",
+        "summary": "Update relationship tag",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRelationshipTagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-relationships"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/relationships/note": {
+      "patch": {
+        "operationId": "RelationshipsController_upsertNote",
+        "summary": "Upsert private note for relationship",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelationshipNoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-relationships"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/relationships/mine": {
+      "get": {
+        "operationId": "RelationshipsController_listMine",
+        "summary": "List my relationships",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-relationships"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/relationships/lookup-phone": {
+      "post": {
+        "operationId": "RelationshipsController_lookupByPhone",
+        "summary": "Phone-based exact lookup with visibility enforcement",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhoneLookupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-relationships"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/moderation/block": {
+      "post": {
+        "operationId": "ModerationController_blockUser",
+        "summary": "Block a user in personal mode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-moderation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/moderation/unblock": {
+      "post": {
+        "operationId": "ModerationController_unblockUser",
+        "summary": "Unblock a previously blocked user",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnblockUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-moderation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/moderation/report": {
+      "post": {
+        "operationId": "ModerationController_reportUser",
+        "summary": "Report a user for abuse/spam",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-moderation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/moderation/state": {
+      "get": {
+        "operationId": "ModerationController_getState",
+        "summary": "Get current user moderation state",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-moderation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/moderation/shadow-ban": {
+      "patch": {
+        "operationId": "ModerationController_shadowBan",
+        "summary": "Admin-only shadow-ban toggle",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-moderation"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/communication/availability": {
+      "patch": {
+        "operationId": "CommunicationController_updateAvailability",
+        "summary": "Update personal availability state",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAvailabilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-communication"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "CommunicationController_getUsersAvailability",
+        "summary": "Get availability for multiple users",
+        "parameters": [
+          {
+            "name": "userIds",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-communication"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/communication/availability/me": {
+      "get": {
+        "operationId": "CommunicationController_getMyAvailability",
+        "summary": "Get own availability state",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-communication"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/communication/missed-interaction": {
+      "post": {
+        "operationId": "CommunicationController_logMissedInteraction",
+        "summary": "Log missed interaction metadata",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MissedInteractionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-communication"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/communication/calls/start": {
+      "post": {
+        "operationId": "CommunicationController_startCall",
+        "summary": "Start call metadata tracking (no VoIP)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartCallDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-communication"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/communication/calls/end": {
+      "post": {
+        "operationId": "CommunicationController_endCall",
+        "summary": "End call metadata tracking",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndCallDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-communication"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/calendar/events": {
+      "post": {
+        "operationId": "CalendarController_createEvent",
+        "summary": "Create personal event",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePersonalEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-calendar"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "CalendarController_listEvents",
+        "summary": "List personal calendar events by date range",
+        "parameters": [
+          {
+            "name": "startDate",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-calendar"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/calendar/events/{id}/rsvp": {
+      "patch": {
+        "operationId": "CalendarController_respondRsvp",
+        "summary": "Update RSVP for invited event participant",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondRsvpDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-calendar"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/calendar/events/{id}/reminders": {
+      "post": {
+        "operationId": "CalendarController_scheduleReminder",
+        "summary": "Schedule event reminder",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleReminderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-calendar"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/calendar/events/{id}/cancel-occurrence": {
+      "patch": {
+        "operationId": "CalendarController_cancelOccurrence",
+        "summary": "Cancel single recurring occurrence",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelOccurrenceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-calendar"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/calendar/events/{id}": {
+      "delete": {
+        "operationId": "CalendarController_removeEvent",
+        "summary": "Soft delete personal event",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-calendar"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/appointments/slots": {
+      "post": {
+        "operationId": "AppointmentsController_createSlot",
+        "summary": "Create provider appointment slot",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppointmentSlotDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/appointments/request": {
+      "post": {
+        "operationId": "AppointmentsController_requestAppointment",
+        "summary": "Request appointment using available slot",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/appointments/transition": {
+      "post": {
+        "operationId": "AppointmentsController_transitionAppointment",
+        "summary": "Transition appointment status with strict state machine",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/appointments/reschedule": {
+      "post": {
+        "operationId": "AppointmentsController_reschedule",
+        "summary": "Reschedule appointment preserving history",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RescheduleAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/appointments/mine": {
+      "get": {
+        "operationId": "AppointmentsController_listMine",
+        "summary": "List my appointments",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/blood/donor/register": {
+      "post": {
+        "operationId": "BloodController_registerDonor",
+        "summary": "Register/update donor profile with encrypted health metadata",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDonorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-blood"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/blood/donor/me": {
+      "get": {
+        "operationId": "BloodController_getMyDonorProfile",
+        "summary": "Get own donor profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-blood"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/blood/donor/history": {
+      "post": {
+        "operationId": "BloodController_addDonationHistory",
+        "summary": "Add donation history and recalculate eligibility/badges",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDonationHistoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-blood"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/blood/requests": {
+      "post": {
+        "operationId": "BloodController_createRequest",
+        "summary": "Create personal blood request",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePersonalBloodRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-blood"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/blood/requests/emergency-alert": {
+      "post": {
+        "operationId": "BloodController_triggerAlert",
+        "summary": "Trigger emergency blood alert broadcast with idempotency",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriggerEmergencyAlertDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-blood"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/blood/impact": {
+      "get": {
+        "operationId": "BloodController_getImpact",
+        "summary": "Get public blood impact counters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-blood"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/appointments": {
+      "post": {
+        "operationId": "AppointmentsController_createAppointment",
+        "summary": "Create appointment request for a business service",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/appointments/me": {
+      "get": {
+        "operationId": "AppointmentsController_listMyAppointments",
+        "summary": "List my appointments",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "REQUESTED",
+                "CONFIRMED",
+                "COMPLETED",
+                "CANCELLED",
+                "NO_SHOW"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/appointments/{id}/cancel": {
+      "post": {
+        "operationId": "AppointmentsController_cancelMyAppointment",
+        "summary": "Cancel my appointment within cancellation window",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/appointments/upcoming": {
+      "get": {
+        "operationId": "BusinessAppointmentsController_listUpcoming",
+        "summary": "List upcoming appointments for business owner",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "REQUESTED",
+                "CONFIRMED",
+                "COMPLETED",
+                "CANCELLED",
+                "NO_SHOW"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/appointments/past": {
+      "get": {
+        "operationId": "BusinessAppointmentsController_listPast",
+        "summary": "List past appointments for business owner",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "REQUESTED",
+                "CONFIRMED",
+                "COMPLETED",
+                "CANCELLED",
+                "NO_SHOW"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/appointments/{id}/confirm": {
+      "post": {
+        "operationId": "BusinessAppointmentsController_confirm",
+        "summary": "Confirm appointment request",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/appointments/{id}/cancel": {
+      "post": {
+        "operationId": "BusinessAppointmentsController_cancel",
+        "summary": "Cancel appointment by business",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/appointments/{id}/complete": {
+      "post": {
+        "operationId": "BusinessAppointmentsController_complete",
+        "summary": "Mark appointment as completed",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/appointments/{id}/no-show": {
+      "post": {
+        "operationId": "BusinessAppointmentsController_noShow",
+        "summary": "Mark appointment as no-show",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/appointments/{id}/status-logs": {
+      "get": {
+        "operationId": "BusinessAppointmentsController_getStatusLogs",
+        "summary": "List appointment status transition logs",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
     }
   },
   "info": {
@@ -2081,8 +5127,88 @@
       "description": "Badge and reputation system"
     },
     {
+      "name": "push",
+      "description": "Chrome push notification endpoints"
+    },
+    {
       "name": "admin",
       "description": "Admin oversight and monitoring endpoints"
+    },
+    {
+      "name": "admin-notifications",
+      "description": "Admin notification control endpoints"
+    },
+    {
+      "name": "chat",
+      "description": "Realtime chat APIs + websocket contract"
+    },
+    {
+      "name": "presence",
+      "description": "Presence and typing state endpoints"
+    },
+    {
+      "name": "appointments",
+      "description": "Appointment booking and lifecycle endpoints"
+    },
+    {
+      "name": "business",
+      "description": "Business profile and verification endpoints"
+    },
+    {
+      "name": "business-services",
+      "description": "Business service catalog endpoints"
+    },
+    {
+      "name": "business-availability",
+      "description": "Business availability management endpoints"
+    },
+    {
+      "name": "business-appointments",
+      "description": "Business-side appointment operations"
+    },
+    {
+      "name": "business-communications",
+      "description": "Business customer communication endpoints"
+    },
+    {
+      "name": "business-revenue",
+      "description": "Business revenue and payment tracking endpoints"
+    },
+    {
+      "name": "business-analytics",
+      "description": "Business analytics and operational insights endpoints"
+    },
+    {
+      "name": "business-admin",
+      "description": "Platform admin controls for business verification"
+    },
+    {
+      "name": "personal-identity",
+      "description": "Personal mode identity and profile endpoints"
+    },
+    {
+      "name": "personal-relationships",
+      "description": "Personal mode relationship and contact discovery endpoints"
+    },
+    {
+      "name": "personal-communication",
+      "description": "Personal mode communication metadata endpoints"
+    },
+    {
+      "name": "personal-calendar",
+      "description": "Personal mode calendar and reminder endpoints"
+    },
+    {
+      "name": "personal-appointments",
+      "description": "Personal mode appointment management endpoints"
+    },
+    {
+      "name": "personal-moderation",
+      "description": "Personal mode privacy and moderation endpoints"
+    },
+    {
+      "name": "personal-blood",
+      "description": "Personal mode blood donation and emergency endpoints"
     }
   ],
   "servers": [],
@@ -2823,6 +5949,1313 @@
             "example": "#4A90D9"
           }
         }
+      },
+      "CreateNotificationTemplateDto": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "description": "Stable template identifier",
+            "example": "system-maintenance-alert"
+          },
+          "title": {
+            "type": "string",
+            "description": "Notification title shown to users",
+            "example": "System Maintenance Alert"
+          },
+          "body": {
+            "type": "string",
+            "description": "Notification body shown to users",
+            "example": "We will be performing scheduled maintenance tonight at 11 PM."
+          },
+          "category": {
+            "type": "string",
+            "description": "Logical category for filtering templates",
+            "example": "maintenance"
+          }
+        },
+        "required": [
+          "templateId",
+          "title",
+          "body",
+          "category"
+        ]
+      },
+      "NotificationPayloadDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Important Announcement"
+          },
+          "body": {
+            "type": "string",
+            "example": "Please update your app to the latest version."
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Optional metadata included in notification data payload",
+            "example": {
+              "type": "announcement",
+              "priority": "high"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "body"
+        ]
+      },
+      "CreateNotificationJobDto": {
+        "type": "object",
+        "properties": {
+          "notificationType": {
+            "type": "string",
+            "enum": [
+              "predefined",
+              "custom"
+            ],
+            "example": "predefined"
+          },
+          "templateId": {
+            "type": "string",
+            "description": "Required when notificationType = predefined",
+            "example": "system-maintenance-alert"
+          },
+          "payload": {
+            "description": "Required when notificationType = custom",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NotificationPayloadDto"
+              }
+            ]
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "ALL_USERS"
+            ],
+            "default": "ALL_USERS",
+            "example": "ALL_USERS"
+          },
+          "scheduledAt": {
+            "type": "string",
+            "description": "ISO datetime with timezone offset (e.g. 2026-02-20T18:30:00+05:30 or UTC Z). If omitted, job is sent immediately.",
+            "example": "2026-02-20T18:30:00+05:30"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone name (for audit and UX)",
+            "example": "Asia/Kolkata"
+          },
+          "clientRequestId": {
+            "type": "string",
+            "description": "Client-side idempotency key to prevent duplicate submissions",
+            "example": "3fdd5f31-3ec7-4f95-9ad2-b5f41b14cb77"
+          }
+        },
+        "required": [
+          "notificationType"
+        ]
+      },
+      "ScheduleNotificationJobDto": {
+        "type": "object",
+        "properties": {
+          "scheduledAt": {
+            "type": "string",
+            "description": "Future ISO datetime with timezone offset",
+            "example": "2026-02-20T18:30:00+05:30"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone name (audit/UX)",
+            "example": "Asia/Kolkata"
+          }
+        },
+        "required": [
+          "scheduledAt"
+        ]
+      },
+      "PushKeys": {
+        "type": "object",
+        "properties": {
+          "p256dh": {
+            "type": "string",
+            "description": "P256DH key for push encryption"
+          },
+          "auth": {
+            "type": "string",
+            "description": "Auth secret for push encryption"
+          }
+        },
+        "required": [
+          "p256dh",
+          "auth"
+        ]
+      },
+      "SubscribeDto": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "description": "Push subscription endpoint URL"
+          },
+          "keys": {
+            "description": "Push subscription keys",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PushKeys"
+              }
+            ]
+          },
+          "userAgent": {
+            "type": "string",
+            "description": "User agent string"
+          }
+        },
+        "required": [
+          "endpoint",
+          "keys"
+        ]
+      },
+      "RegisterOneSignalDeviceDto": {
+        "type": "object",
+        "properties": {
+          "onesignalPlayerId": {
+            "type": "string",
+            "description": "OneSignal player ID for current browser/device"
+          },
+          "userAgent": {
+            "type": "string",
+            "description": "Optional user-agent override for this device"
+          },
+          "deviceInfo": {
+            "type": "object",
+            "description": "Optional structured device metadata"
+          }
+        },
+        "required": [
+          "onesignalPlayerId"
+        ]
+      },
+      "NotifyDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Notification title"
+          },
+          "body": {
+            "type": "string",
+            "description": "Notification body text"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon URL for the notification"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL to open when notification is clicked"
+          },
+          "tag": {
+            "type": "string",
+            "description": "Notification tag for grouping"
+          },
+          "data": {
+            "type": "object",
+            "description": "Additional data payload"
+          }
+        },
+        "required": [
+          "title",
+          "body"
+        ]
+      },
+      "BusinessAddressDto": {
+        "type": "object",
+        "properties": {
+          "line1": {
+            "type": "string",
+            "example": "12 Residency Road"
+          },
+          "line2": {
+            "type": "string",
+            "example": "Near central park"
+          },
+          "city": {
+            "type": "string",
+            "example": "Bengaluru"
+          },
+          "state": {
+            "type": "string",
+            "example": "Karnataka"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "560001"
+          }
+        },
+        "required": [
+          "line1",
+          "city",
+          "state",
+          "pincode"
+        ]
+      },
+      "GeoLocationDto": {
+        "type": "object",
+        "properties": {
+          "longitude": {
+            "type": "number",
+            "example": 77.5946
+          },
+          "latitude": {
+            "type": "number",
+            "example": 12.9716
+          }
+        },
+        "required": [
+          "longitude",
+          "latitude"
+        ]
+      },
+      "CreateBusinessDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Apex Legal Advisors"
+          },
+          "logoUrl": {
+            "type": "string",
+            "example": "https://cdn.example.com/logo.png"
+          },
+          "description": {
+            "type": "string",
+            "example": "Specialized legal consultancy for startups."
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "HEALTHCARE",
+              "LEGAL",
+              "FINANCE",
+              "EDUCATION",
+              "CONSULTING",
+              "WELLNESS",
+              "TECHNICAL",
+              "OTHER"
+            ],
+            "example": "LEGAL"
+          },
+          "subCategory": {
+            "type": "string",
+            "example": "Corporate Law"
+          },
+          "certifications": {
+            "example": [
+              "ISO-9001",
+              "Bar Council Registered"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "gstin": {
+            "type": "string",
+            "example": "29ABCDE1234F1Z5"
+          },
+          "address": {
+            "$ref": "#/components/schemas/BusinessAddressDto"
+          },
+          "geoLocation": {
+            "$ref": "#/components/schemas/GeoLocationDto"
+          }
+        },
+        "required": [
+          "name",
+          "category",
+          "address",
+          "geoLocation"
+        ]
+      },
+      "UpdateBusinessAddressDto": {
+        "type": "object",
+        "properties": {
+          "line1": {
+            "type": "string",
+            "example": "12 Residency Road"
+          },
+          "line2": {
+            "type": "string",
+            "example": "Near central park"
+          },
+          "city": {
+            "type": "string",
+            "example": "Bengaluru"
+          },
+          "state": {
+            "type": "string",
+            "example": "Karnataka"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "560001"
+          }
+        }
+      },
+      "UpdateGeoLocationDto": {
+        "type": "object",
+        "properties": {
+          "longitude": {
+            "type": "number",
+            "example": 77.5946
+          },
+          "latitude": {
+            "type": "number",
+            "example": 12.9716
+          }
+        }
+      },
+      "UpdateBusinessDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Apex Legal Advisors"
+          },
+          "logoUrl": {
+            "type": "string",
+            "example": "https://cdn.example.com/logo.png"
+          },
+          "description": {
+            "type": "string",
+            "example": "Specialized legal consultancy for startups."
+          },
+          "subCategory": {
+            "type": "string",
+            "example": "Corporate Law"
+          },
+          "certifications": {
+            "example": [
+              "ISO-9001",
+              "Bar Council Registered"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "gstin": {
+            "type": "string",
+            "example": "29ABCDE1234F1Z5"
+          },
+          "address": {
+            "$ref": "#/components/schemas/UpdateBusinessAddressDto"
+          },
+          "geoLocation": {
+            "$ref": "#/components/schemas/UpdateGeoLocationDto"
+          }
+        }
+      },
+      "VerifyBusinessDto": {
+        "type": "object",
+        "properties": {
+          "verificationStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "SUSPENDED"
+            ],
+            "example": "APPROVED"
+          },
+          "verificationNotes": {
+            "type": "string",
+            "example": "KYC verified by admin"
+          }
+        },
+        "required": [
+          "verificationStatus"
+        ]
+      },
+      "SendBusinessWarningDto": {
+        "type": "object",
+        "properties": {
+          "warningMessage": {
+            "type": "string",
+            "example": "Your business profile requires updates for compliance.",
+            "maxLength": 500
+          }
+        }
+      },
+      "CreateBusinessServiceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Initial Consultation"
+          },
+          "description": {
+            "type": "string",
+            "example": "60 minute consultation session"
+          },
+          "consultationType": {
+            "type": "string",
+            "enum": [
+              "ONLINE",
+              "OFFLINE",
+              "HYBRID"
+            ],
+            "example": "ONLINE"
+          },
+          "pricingModel": {
+            "type": "string",
+            "enum": [
+              "FIXED",
+              "HOURLY"
+            ],
+            "example": "FIXED"
+          },
+          "price": {
+            "type": "number",
+            "example": 1200
+          },
+          "durationMinutes": {
+            "type": "number",
+            "example": 60
+          },
+          "requiredDocuments": {
+            "example": [
+              "ID Proof"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "consultationType",
+          "pricingModel",
+          "price",
+          "durationMinutes"
+        ]
+      },
+      "UpdateBusinessServiceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Initial Consultation"
+          },
+          "description": {
+            "type": "string",
+            "example": "60 minute consultation session"
+          },
+          "consultationType": {
+            "type": "string",
+            "enum": [
+              "ONLINE",
+              "OFFLINE",
+              "HYBRID"
+            ],
+            "example": "ONLINE"
+          },
+          "pricingModel": {
+            "type": "string",
+            "enum": [
+              "FIXED",
+              "HOURLY"
+            ],
+            "example": "FIXED"
+          },
+          "price": {
+            "type": "number",
+            "example": 1200
+          },
+          "durationMinutes": {
+            "type": "number",
+            "example": 60
+          },
+          "requiredDocuments": {
+            "example": [
+              "ID Proof"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "WeeklyScheduleItemDto": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 6,
+            "example": 1
+          },
+          "startTime": {
+            "type": "string",
+            "example": "09:00"
+          },
+          "endTime": {
+            "type": "string",
+            "example": "18:00"
+          }
+        },
+        "required": [
+          "dayOfWeek",
+          "startTime",
+          "endTime"
+        ]
+      },
+      "ExceptionDateDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "example": "2026-03-20"
+          },
+          "isClosed": {
+            "type": "boolean",
+            "example": false
+          },
+          "customHours": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeeklyScheduleItemDto"
+            }
+          }
+        },
+        "required": [
+          "date"
+        ]
+      },
+      "UpdateBusinessAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "weeklySchedule": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeeklyScheduleItemDto"
+            }
+          },
+          "exceptionDates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExceptionDateDto"
+            }
+          },
+          "customAutoReplyMessage": {
+            "type": "string",
+            "example": "Please expect delayed response while we are busy."
+          }
+        },
+        "required": [
+          "weeklySchedule"
+        ]
+      },
+      "UpdateBusinessTemporaryStatusDto": {
+        "type": "object",
+        "properties": {
+          "temporaryStatus": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "BUSY",
+              "CLOSED"
+            ],
+            "example": "BUSY"
+          },
+          "customAutoReplyMessage": {
+            "type": "string",
+            "example": "Currently in session, will reply shortly."
+          }
+        },
+        "required": [
+          "temporaryStatus"
+        ]
+      },
+      "SendBusinessCommunicationDto": {
+        "type": "object",
+        "properties": {
+          "messageType": {
+            "type": "string",
+            "enum": [
+              "REMINDER",
+              "FOLLOW_UP",
+              "BROADCAST"
+            ],
+            "example": "REMINDER"
+          },
+          "appointmentId": {
+            "type": "string",
+            "example": "65f1d5d523ba3f25158a5b5c"
+          },
+          "userId": {
+            "type": "string",
+            "example": "65f1d5d523ba3f25158a5b5d"
+          },
+          "message": {
+            "type": "string",
+            "example": "Reminder for your session tomorrow at 10 AM"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "example": "dedupe-key-123"
+          }
+        },
+        "required": [
+          "messageType",
+          "message"
+        ]
+      },
+      "UpdatePaymentStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "REFUNDED"
+            ],
+            "example": "PAID"
+          },
+          "refundAmount": {
+            "type": "number",
+            "example": 0
+          },
+          "reason": {
+            "type": "string",
+            "example": "Captured via offline ledger update"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "UpdateProfileSocialLinksDto": {
+        "type": "object",
+        "properties": {
+          "linkedIn": {
+            "type": "string"
+          },
+          "x": {
+            "type": "string"
+          },
+          "instagram": {
+            "type": "string"
+          },
+          "facebook": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdatePrivacySettingsDto": {
+        "type": "object",
+        "properties": {
+          "allowMessagesFrom": {
+            "type": "string",
+            "enum": [
+              "EVERYONE",
+              "CONNECTIONS"
+            ]
+          },
+          "allowProfileDiscovery": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "expertise": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "servicesOffered": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "PUBLIC",
+              "CONNECTIONS",
+              "PRIVATE"
+            ]
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone identifier (e.g. Asia/Kolkata, Europe/London)"
+          },
+          "socialLinks": {
+            "$ref": "#/components/schemas/UpdateProfileSocialLinksDto"
+          },
+          "privacySettings": {
+            "$ref": "#/components/schemas/UpdatePrivacySettingsDto"
+          }
+        }
+      },
+      "CreateRelationshipRequestDto": {
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string",
+            "enum": [
+              "FRIEND",
+              "PROFESSIONAL",
+              "DOCTOR",
+              "VENDOR",
+              "OTHER"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetUserId"
+        ]
+      },
+      "RespondRelationshipRequestDto": {
+        "type": "object",
+        "properties": {
+          "relationshipId": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "REJECTED"
+            ]
+          }
+        },
+        "required": [
+          "relationshipId",
+          "action"
+        ]
+      },
+      "BlockRelationshipDto": {
+        "type": "object",
+        "properties": {
+          "relationshipId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "relationshipId"
+        ]
+      },
+      "UpdateRelationshipTagDto": {
+        "type": "object",
+        "properties": {
+          "relationshipId": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string",
+            "enum": [
+              "FRIEND",
+              "PROFESSIONAL",
+              "DOCTOR",
+              "VENDOR",
+              "OTHER"
+            ]
+          }
+        },
+        "required": [
+          "relationshipId",
+          "tag"
+        ]
+      },
+      "RelationshipNoteDto": {
+        "type": "object",
+        "properties": {
+          "relationshipId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "relationshipId",
+          "note"
+        ]
+      },
+      "PhoneLookupDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "9876543210"
+          }
+        },
+        "required": [
+          "phone"
+        ]
+      },
+      "BlockUserDto": {
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetUserId"
+        ]
+      },
+      "UnblockUserDto": {
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetUserId"
+        ]
+      },
+      "ReportUserDto": {
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "enum": [
+              "SPAM",
+              "HARASSMENT",
+              "IMPERSONATION",
+              "ABUSE",
+              "INAPPROPRIATE_CONTENT",
+              "OTHER"
+            ]
+          },
+          "details": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetUserId",
+          "reasonCode"
+        ]
+      },
+      "UpdateAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "availability": {
+            "type": "string",
+            "enum": [
+              "ONLINE",
+              "BUSY",
+              "OFFLINE"
+            ]
+          },
+          "busyMessage": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "availability"
+        ]
+      },
+      "MissedInteractionDto": {
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "string"
+          },
+          "interactionType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetUserId",
+          "interactionType"
+        ]
+      },
+      "StartCallDto": {
+        "type": "object",
+        "properties": {
+          "receiverUserId": {
+            "type": "string"
+          },
+          "callType": {
+            "type": "string",
+            "default": "audio"
+          },
+          "callReferenceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "receiverUserId"
+        ]
+      },
+      "EndCallDto": {
+        "type": "object",
+        "properties": {
+          "callReferenceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "callReferenceId"
+        ]
+      },
+      "CreatePersonalEventDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "startTime": {
+            "type": "string"
+          },
+          "endTime": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "PERSONAL",
+              "PROFESSIONAL"
+            ]
+          },
+          "participantIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recurringRule": {
+            "type": "string",
+            "description": "RRULE expression for recurring event"
+          },
+          "reminderLeadMinutes": {
+            "type": "number",
+            "description": "Reminder lead time in minutes",
+            "default": 30
+          }
+        },
+        "required": [
+          "title",
+          "startTime",
+          "endTime",
+          "timezone"
+        ]
+      },
+      "RespondRsvpDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "DECLINED",
+              "CANCELLED"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "ScheduleReminderDto": {
+        "type": "object",
+        "properties": {
+          "triggerAt": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string",
+            "default": "push"
+          }
+        },
+        "required": [
+          "triggerAt"
+        ]
+      },
+      "CancelOccurrenceDto": {
+        "type": "object",
+        "properties": {
+          "occurrenceDate": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "occurrenceDate"
+        ]
+      },
+      "CreateAppointmentSlotDto": {
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "type": "string"
+          },
+          "endTime": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "startTime",
+          "endTime",
+          "timezone"
+        ]
+      },
+      "RequestAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "slotId": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "slotId"
+        ]
+      },
+      "TransitionAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "appointmentId": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "CONFIRMED",
+              "COMPLETED",
+              "CANCELLED",
+              "NO_SHOW"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appointmentId",
+          "toStatus"
+        ]
+      },
+      "RescheduleAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "appointmentId": {
+            "type": "string"
+          },
+          "newSlotId": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appointmentId",
+          "newSlotId"
+        ]
+      },
+      "RegisterDonorDto": {
+        "type": "object",
+        "properties": {
+          "bloodGroup": {
+            "type": "string",
+            "enum": [
+              "A+",
+              "A-",
+              "B+",
+              "B-",
+              "AB+",
+              "AB-",
+              "O+",
+              "O-"
+            ]
+          },
+          "consentForDonation": {
+            "type": "boolean"
+          },
+          "optInVisibility": {
+            "type": "boolean",
+            "default": true
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "healthMetadata": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "bloodGroup",
+          "consentForDonation",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "AddDonationHistoryDto": {
+        "type": "object",
+        "properties": {
+          "donatedAt": {
+            "type": "string"
+          },
+          "locationText": {
+            "type": "string"
+          },
+          "recipientType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "donatedAt"
+        ]
+      },
+      "CreatePersonalBloodRequestDto": {
+        "type": "object",
+        "properties": {
+          "bloodGroup": {
+            "type": "string",
+            "enum": [
+              "A+",
+              "A-",
+              "B+",
+              "B-",
+              "AB+",
+              "AB-",
+              "O+",
+              "O-"
+            ]
+          },
+          "unitsNeeded": {
+            "type": "number"
+          },
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "NORMAL",
+              "URGENT",
+              "EMERGENCY"
+            ],
+            "default": "NORMAL"
+          },
+          "locationText": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "consentToBroadcast": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "bloodGroup",
+          "unitsNeeded",
+          "locationText",
+          "city",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "TriggerEmergencyAlertDto": {
+        "type": "object",
+        "properties": {
+          "bloodRequestId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "bloodRequestId",
+          "message"
+        ]
+      },
+      "CreateAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "businessId": {
+            "type": "string",
+            "example": "65f1d5d523ba3f25158a5b5a"
+          },
+          "serviceId": {
+            "type": "string",
+            "example": "65f1d5d523ba3f25158a5b5b"
+          },
+          "scheduledAt": {
+            "type": "string",
+            "example": "2026-03-20T10:30:00.000Z"
+          },
+          "notes": {
+            "type": "string",
+            "example": "Need consultation for recurring issue"
+          }
+        },
+        "required": [
+          "businessId",
+          "serviceId",
+          "scheduledAt"
+        ]
       }
     }
   }
