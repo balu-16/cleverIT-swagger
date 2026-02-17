@@ -2052,6 +2052,26 @@
         ]
       }
     },
+    "/api/admin/performance/summary": {
+      "get": {
+        "operationId": "AdminController_getPerformanceSummary",
+        "summary": "Temporary admin performance summary (p95/p99 routes, Mongo latency, Redis hit/miss, WebSocket connections, memory, event loop lag)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/admin/notifications/templates": {
       "post": {
         "operationId": "AdminNotificationsController_createTemplate",
@@ -2920,6 +2940,341 @@
             }
           }
         ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/chat/conversations": {
+      "get": {
+        "operationId": "ChatApiController_getConversations",
+        "summary": "List current user conversations (chat backend)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "ChatApiController_createConversation",
+        "summary": "Create conversation (direct/group) (chat backend)",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/chat/conversations/{id}": {
+      "get": {
+        "operationId": "ChatApiController_getConversation",
+        "summary": "Get one conversation details (chat backend)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/chat/conversations/direct": {
+      "post": {
+        "operationId": "ChatApiController_startDirectConversation",
+        "summary": "Find or create direct conversation by participant email (chat backend)",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/chat/conversations/{id}/messages": {
+      "get": {
+        "operationId": "ChatApiController_getMessages",
+        "summary": "Get paginated message history (chat backend)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "before",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/chat/messages": {
+      "post": {
+        "operationId": "ChatApiController_sendMessage",
+        "summary": "Send message via REST fallback (chat backend)",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/chat/messages/{id}": {
+      "put": {
+        "operationId": "ChatApiController_updateMessage",
+        "summary": "Edit a sent message (chat backend)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "ChatApiController_deleteMessage",
+        "summary": "Delete a sent message (chat backend)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/chat/users/search": {
+      "get": {
+        "operationId": "ChatApiController_searchUsers",
+        "summary": "Search users by display name or email for chat (chat backend)",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/chat/conversations/{id}/read": {
+      "post": {
+        "operationId": "ChatApiController_markRead",
+        "summary": "Mark all unread messages in conversation as read (chat backend)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/chat/notifications": {
+      "get": {
+        "operationId": "ChatApiController_getChatNotifications",
+        "summary": "List chat notifications",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/chat/notifications/{id}/read": {
+      "post": {
+        "operationId": "ChatApiController_markChatNotificationRead",
+        "summary": "Mark chat notification as read",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/chat/profile-picture/sync": {
+      "post": {
+        "operationId": "ChatApiController_syncProfilePicture",
+        "summary": "Broadcast latest profile picture to chat peers",
+        "parameters": [],
         "responses": {
           "201": {
             "description": ""
@@ -5217,8 +5572,16 @@
       "description": "Production backend"
     },
     {
+      "url": "https://claverit-chat-backend.onrender.com",
+      "description": "Production chat backend"
+    },
+    {
       "url": "http://localhost:3000",
       "description": "Local backend"
+    },
+    {
+      "url": "http://localhost:3001",
+      "description": "Local chat backend"
     }
   ],
   "components": {

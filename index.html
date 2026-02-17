@@ -15,12 +15,13 @@
     window.onload = () => {
       const host = window.location.hostname;
       const isLocalhost = host === "localhost" || host === "127.0.0.1";
-      const apiBaseUrl = isLocalhost
+      const mainApiBaseUrl = isLocalhost
         ? "http://localhost:3000"
         : "https://clever-it-hazel.vercel.app";
-      const specUrl = isLocalhost
-        ? "http://localhost:3000/api/docs-json"
-        : "./swagger.yaml";
+      const chatApiBaseUrl = isLocalhost
+        ? "http://localhost:3001"
+        : "https://claverit-chat-backend.onrender.com";
+      const specUrl = "./swagger.yaml";
       window.ui = SwaggerUIBundle({
         url: specUrl,
         dom_id: "#swagger-ui",
@@ -39,7 +40,9 @@
         requestInterceptor: (req) => {
           const swaggerOrigin = window.location.origin;
           if (req.url.startsWith(`${swaggerOrigin}/api/`)) {
-            req.url = req.url.replace(swaggerOrigin, apiBaseUrl);
+            req.url = req.url.replace(swaggerOrigin, mainApiBaseUrl);
+          } else if (req.url.startsWith(`${swaggerOrigin}/chat/`)) {
+            req.url = req.url.replace(swaggerOrigin, chatApiBaseUrl);
           }
           return req;
         },
