@@ -1801,7 +1801,9 @@
             "schema": {
               "enum": [
                 "user",
-                "admin"
+                "business_user",
+                "business_admin",
+                "super_admin"
               ],
               "type": "string"
             }
@@ -2034,6 +2036,93 @@
             "in": "query",
             "schema": {
               "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/users/{id}/status": {
+      "patch": {
+        "operationId": "AdminController_setUserStatus",
+        "summary": "Activate or deactivate a user (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/users/{id}/role": {
+      "patch": {
+        "operationId": "AdminController_setUserRole",
+        "summary": "Change user role (admin only, cannot promote to super_admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/admin/users/{id}/business": {
+      "patch": {
+        "operationId": "AdminController_setUserBusiness",
+        "summary": "Associate or disassociate user from a business (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -2940,341 +3029,6 @@
             }
           }
         ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/chat/conversations": {
-      "get": {
-        "operationId": "ChatApiController_getConversations",
-        "summary": "List current user conversations (chat backend)",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      },
-      "post": {
-        "operationId": "ChatApiController_createConversation",
-        "summary": "Create conversation (direct/group) (chat backend)",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/chat/conversations/{id}": {
-      "get": {
-        "operationId": "ChatApiController_getConversation",
-        "summary": "Get one conversation details (chat backend)",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/chat/conversations/direct": {
-      "post": {
-        "operationId": "ChatApiController_startDirectConversation",
-        "summary": "Find or create direct conversation by participant email (chat backend)",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/chat/conversations/{id}/messages": {
-      "get": {
-        "operationId": "ChatApiController_getMessages",
-        "summary": "Get paginated message history (chat backend)",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "before",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/chat/messages": {
-      "post": {
-        "operationId": "ChatApiController_sendMessage",
-        "summary": "Send message via REST fallback (chat backend)",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/chat/messages/{id}": {
-      "put": {
-        "operationId": "ChatApiController_updateMessage",
-        "summary": "Edit a sent message (chat backend)",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "ChatApiController_deleteMessage",
-        "summary": "Delete a sent message (chat backend)",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/chat/users/search": {
-      "get": {
-        "operationId": "ChatApiController_searchUsers",
-        "summary": "Search users by display name or email for chat (chat backend)",
-        "parameters": [
-          {
-            "name": "q",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/chat/conversations/{id}/read": {
-      "post": {
-        "operationId": "ChatApiController_markRead",
-        "summary": "Mark all unread messages in conversation as read (chat backend)",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/chat/notifications": {
-      "get": {
-        "operationId": "ChatApiController_getChatNotifications",
-        "summary": "List chat notifications",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/chat/notifications/{id}/read": {
-      "post": {
-        "operationId": "ChatApiController_markChatNotificationRead",
-        "summary": "Mark chat notification as read",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "chat"
-        ],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/chat/profile-picture/sync": {
-      "post": {
-        "operationId": "ChatApiController_syncProfilePicture",
-        "summary": "Broadcast latest profile picture to chat peers",
-        "parameters": [],
         "responses": {
           "201": {
             "description": ""
@@ -4223,6 +3977,35 @@
         ]
       }
     },
+    "/api/personal/relationships/search-users": {
+      "get": {
+        "operationId": "RelationshipsController_searchUsers",
+        "summary": "Search discoverable users for relationship requests",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-relationships"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/personal/relationships/lookup-phone": {
       "post": {
         "operationId": "RelationshipsController_lookupByPhone",
@@ -4821,6 +4604,64 @@
         ]
       }
     },
+    "/api/personal/appointments/slots/available": {
+      "get": {
+        "operationId": "AppointmentsController_listAvailableSlots",
+        "summary": "List available slots for a provider UUID",
+        "parameters": [
+          {
+            "name": "providerUuid",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/personal/appointments/slots/reschedule/{appointmentUuid}": {
+      "get": {
+        "operationId": "AppointmentsController_listRescheduleSlots",
+        "summary": "List available replacement slots for an appointment",
+        "parameters": [
+          {
+            "name": "appointmentUuid",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-appointments"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/personal/appointments/transition": {
       "post": {
         "operationId": "AppointmentsController_transitionAppointment",
@@ -5011,6 +4852,26 @@
         ]
       }
     },
+    "/api/personal/blood/requests/mine": {
+      "get": {
+        "operationId": "BloodController_listMyRequests",
+        "summary": "List own personal blood requests",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "personal-blood"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/personal/blood/requests/emergency-alert": {
       "post": {
         "operationId": "BloodController_triggerAlert",
@@ -5053,6 +4914,197 @@
         },
         "tags": [
           "personal-blood"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business-admin/users": {
+      "get": {
+        "operationId": "BusinessAdminMonitoringController_listUsers",
+        "summary": "List users scoped to business admin's business",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountStatus",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "all",
+                "active",
+                "inactive",
+                "deleted"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-admin-monitoring"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business-admin/users/{id}/profile": {
+      "get": {
+        "operationId": "BusinessAdminMonitoringController_getProfile",
+        "summary": "Get profile of a business user (scoped)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-admin-monitoring"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business-admin/users/{id}/activity/summary": {
+      "get": {
+        "operationId": "BusinessAdminMonitoringController_getActivitySummary",
+        "summary": "Get activity summary for a business user (scoped)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-admin-monitoring"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business-admin/users/{id}/activity/login-logs": {
+      "get": {
+        "operationId": "BusinessAdminMonitoringController_getLoginLogs",
+        "summary": "Get login logs for a business user (scoped, read-only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-admin-monitoring"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business-admin/users/{id}/status": {
+      "patch": {
+        "operationId": "BusinessAdminMonitoringController_setUserStatus",
+        "summary": "Activate or deactivate a business user (scoped)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business-admin-monitoring"
         ],
         "security": [
           {
@@ -5572,16 +5624,8 @@
       "description": "Production backend"
     },
     {
-      "url": "https://claverit-chat-backend.onrender.com",
-      "description": "Production chat backend"
-    },
-    {
       "url": "http://localhost:3000",
       "description": "Local backend"
-    },
-    {
-      "url": "http://localhost:3001",
-      "description": "Local chat backend"
     }
   ],
   "components": {
@@ -5598,7 +5642,7 @@
         "properties": {
           "phone": {
             "type": "string",
-            "example": "9876543210"
+            "example": "+919876543210"
           }
         },
         "required": [
@@ -5610,7 +5654,7 @@
         "properties": {
           "phone": {
             "type": "string",
-            "example": "9876543210"
+            "example": "+919876543210"
           },
           "otp": {
             "type": "string",
@@ -5675,7 +5719,7 @@
           },
           "phone": {
             "type": "string",
-            "example": "9876543210"
+            "example": "+919876543210"
           },
           "otp": {
             "type": "string",
@@ -7097,7 +7141,7 @@
       "CreateRelationshipRequestDto": {
         "type": "object",
         "properties": {
-          "targetUserId": {
+          "targetUserUuid": {
             "type": "string"
           },
           "tag": {
@@ -7115,13 +7159,13 @@
           }
         },
         "required": [
-          "targetUserId"
+          "targetUserUuid"
         ]
       },
       "RespondRelationshipRequestDto": {
         "type": "object",
         "properties": {
-          "relationshipId": {
+          "relationshipUuid": {
             "type": "string"
           },
           "action": {
@@ -7133,25 +7177,25 @@
           }
         },
         "required": [
-          "relationshipId",
+          "relationshipUuid",
           "action"
         ]
       },
       "BlockRelationshipDto": {
         "type": "object",
         "properties": {
-          "relationshipId": {
+          "relationshipUuid": {
             "type": "string"
           }
         },
         "required": [
-          "relationshipId"
+          "relationshipUuid"
         ]
       },
       "UpdateRelationshipTagDto": {
         "type": "object",
         "properties": {
-          "relationshipId": {
+          "relationshipUuid": {
             "type": "string"
           },
           "tag": {
@@ -7166,14 +7210,14 @@
           }
         },
         "required": [
-          "relationshipId",
+          "relationshipUuid",
           "tag"
         ]
       },
       "RelationshipNoteDto": {
         "type": "object",
         "properties": {
-          "relationshipId": {
+          "relationshipUuid": {
             "type": "string"
           },
           "note": {
@@ -7181,7 +7225,7 @@
           }
         },
         "required": [
-          "relationshipId",
+          "relationshipUuid",
           "note"
         ]
       },
@@ -7190,7 +7234,7 @@
         "properties": {
           "phone": {
             "type": "string",
-            "example": "9876543210"
+            "example": "+919876543210"
           }
         },
         "required": [
@@ -7423,7 +7467,7 @@
       "RequestAppointmentDto": {
         "type": "object",
         "properties": {
-          "slotId": {
+          "slotUuid": {
             "type": "string"
           },
           "notes": {
@@ -7431,13 +7475,13 @@
           }
         },
         "required": [
-          "slotId"
+          "slotUuid"
         ]
       },
       "TransitionAppointmentDto": {
         "type": "object",
         "properties": {
-          "appointmentId": {
+          "appointmentUuid": {
             "type": "string"
           },
           "toStatus": {
@@ -7455,17 +7499,17 @@
           }
         },
         "required": [
-          "appointmentId",
+          "appointmentUuid",
           "toStatus"
         ]
       },
       "RescheduleAppointmentDto": {
         "type": "object",
         "properties": {
-          "appointmentId": {
+          "appointmentUuid": {
             "type": "string"
           },
-          "newSlotId": {
+          "newSlotUuid": {
             "type": "string"
           },
           "notes": {
@@ -7473,8 +7517,8 @@
           }
         },
         "required": [
-          "appointmentId",
-          "newSlotId"
+          "appointmentUuid",
+          "newSlotUuid"
         ]
       },
       "RegisterDonorDto": {
@@ -7591,7 +7635,7 @@
       "TriggerEmergencyAlertDto": {
         "type": "object",
         "properties": {
-          "bloodRequestId": {
+          "bloodRequestUuid": {
             "type": "string"
           },
           "message": {
@@ -7599,7 +7643,7 @@
           }
         },
         "required": [
-          "bloodRequestId",
+          "bloodRequestUuid",
           "message"
         ]
       },
