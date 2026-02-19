@@ -2973,7 +2973,7 @@
     "/api/chat/users/search": {
       "get": {
         "operationId": "ChatController_searchUsers",
-        "summary": "Search users by display name or email for chat",
+        "summary": "Search accepted relationship users by name or phone for chat",
         "parameters": [
           {
             "name": "q",
@@ -2981,7 +2981,8 @@
             "in": "query",
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Search text. Supports accepted relationship full name, email, or phone digits."
           },
           {
             "name": "authorization",
@@ -3101,6 +3102,36 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateBusinessDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "business"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/business/profile/mode": {
+      "patch": {
+        "operationId": "BusinessProfileController_switchMode",
+        "summary": "Switch workspace mode for authenticated business owner",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwitchBusinessModeDto"
               }
             }
           }
@@ -6774,6 +6805,23 @@
             "$ref": "#/components/schemas/UpdateGeoLocationDto"
           }
         }
+      },
+      "SwitchBusinessModeDto": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "description": "Target workspace mode for the authenticated business owner",
+            "example": "business",
+            "enum": [
+              "personal",
+              "business"
+            ]
+          }
+        },
+        "required": [
+          "mode"
+        ]
       },
       "VerifyBusinessDto": {
         "type": "object",
