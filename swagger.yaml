@@ -5519,7 +5519,7 @@
   },
   "info": {
     "title": "NighaTech API",
-    "description": "NighaTech Mobile App Authentication Backend API",
+    "description": "Legacy combined export. Prefer service-owned docs: core (/api/docs), social (/api/docs), notify (/api/docs)",
     "version": "1.0",
     "contact": {}
   },
@@ -5651,12 +5651,52 @@
   ],
   "servers": [
     {
+      "url": "https://clever-it-swagger.vercel.app/api",
+      "description": "Gateway route -> main-backend"
+    },
+    {
+      "url": "https://clever-it-swagger.vercel.app/social",
+      "description": "Gateway route -> claverit-social"
+    },
+    {
+      "url": "https://clever-it-swagger.vercel.app/notify",
+      "description": "Gateway route -> claverit-notify"
+    },
+    {
+      "url": "https://clever-it-swagger.vercel.app/chat",
+      "description": "Gateway route -> chat-backend"
+    },
+    {
       "url": "https://clever-it-hazel.vercel.app",
-      "description": "Production backend"
+      "description": "Main-backend production"
+    },
+    {
+      "url": "https://claverit-social.vercel.app",
+      "description": "Claverit-social production"
+    },
+    {
+      "url": "https://claverit-notifications.vercel.app",
+      "description": "Claverit-notify production"
+    },
+    {
+      "url": "https://claverit-chat-backend.onrender.com",
+      "description": "Chat-backend production"
     },
     {
       "url": "http://localhost:3000",
-      "description": "Local backend"
+      "description": "Main-backend local"
+    },
+    {
+      "url": "http://localhost:3003",
+      "description": "Claverit-social local"
+    },
+    {
+      "url": "http://localhost:3002",
+      "description": "Claverit-notify local"
+    },
+    {
+      "url": "http://localhost:3001",
+      "description": "Chat-backend local"
     }
   ],
   "components": {

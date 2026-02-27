@@ -15,8 +15,16 @@
       "dest": "https://clever-it-hazel.vercel.app/api/$1"
     },
     {
+      "src": "/social/(.*)",
+      "dest": "https://claverit-social.vercel.app/api/$1"
+    },
+    {
       "src": "/chat/(.*)",
-      "dest": "https://claverit-chat-backend.onrender.com/chat/$1"
+      "dest": "https://claverit-chat-backend.onrender.com/$1"
+    },
+    {
+      "src": "/notify/(.*)",
+      "dest": "https://claverit-notifications.vercel.app/api/$1"
     },
     {
       "handle": "filesystem"

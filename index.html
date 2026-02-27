@@ -15,15 +15,22 @@
     window.onload = () => {
       const host = window.location.hostname;
       const isLocalhost = host === "localhost" || host === "127.0.0.1";
-      const mainApiBaseUrl = isLocalhost
-        ? "http://localhost:3000"
-        : "https://clever-it-hazel.vercel.app";
-      const chatApiBaseUrl = isLocalhost
-        ? "http://localhost:3001"
-        : "https://claverit-chat-backend.onrender.com";
-      const specUrl = "./swagger.yaml";
+      const gatewayOrigin = window.location.origin;
+      const serviceSpecs = isLocalhost
+        ? [
+            { name: "core", url: "http://localhost:3000/api/docs-json" },
+            { name: "social", url: "http://localhost:3003/api/docs-json" },
+            { name: "notify", url: "http://localhost:3002/api/docs-json" }
+          ]
+        : [
+            { name: "core", url: `${gatewayOrigin}/api/docs-json` },
+            { name: "social", url: `${gatewayOrigin}/social/docs-json` },
+            { name: "notify", url: `${gatewayOrigin}/notify/docs-json` }
+          ];
+
       window.ui = SwaggerUIBundle({
-        url: specUrl,
+        urls: serviceSpecs,
+        "urls.primaryName": "core",
         dom_id: "#swagger-ui",
         deepLinking: false,
         presets: [
@@ -37,15 +44,6 @@
         docExpansion: "list",
         filter: true,
         tryItOutEnabled: true,
-        requestInterceptor: (req) => {
-          const swaggerOrigin = window.location.origin;
-          if (req.url.startsWith(`${swaggerOrigin}/api/`)) {
-            req.url = req.url.replace(swaggerOrigin, mainApiBaseUrl);
-          } else if (req.url.startsWith(`${swaggerOrigin}/chat/`)) {
-            req.url = req.url.replace(swaggerOrigin, chatApiBaseUrl);
-          }
-          return req;
-        },
         persistAuthorization: true,
         defaultModelsExpandDepth: 1,
         tagsSorter: "alpha",
