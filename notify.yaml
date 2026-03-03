@@ -1,0 +1,562 @@
+openapi: 3.0.3
+info:
+  title: ClaverIT Notify API
+  version: 1.0.0
+  description: |
+    Notification service APIs for user notification feed, admin notification management, and templates.
+    Public endpoints for notification read/list and admin endpoints for notification jobs.
+  contact:
+    name: ClaverIT Support
+    email: support@claverit.com
+
+servers:
+  - url: https://claverit-notifications.vercel.app/api
+    description: Production
+
+tags:
+  - name: notify
+    description: User notification feed endpoints
+  - name: admin-notifications
+    description: Admin notification job management (super_admin only)
+  - name: health
+    description: Health check endpoints
+
+paths:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Health
+  # ─────────────────────────────────────────────────────────────────────────────
+  /health:
+    get:
+      tags: [health]
+      operationId: AppController_health
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # User Notifications (Notify)
+  # ─────────────────────────────────────────────────────────────────────────────
+  /notify/me:
+    get:
+      tags: [notify]
+      operationId: NotifyController_listMyNotifications
+      summary: List my notifications from personal, business, chat, and admin domains
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: domain
+          in: query
+          schema:
+            type: string
+            enum: [personal, business, chat, admin]
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Notification feed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotifications'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /notify/unread-count:
+    get:
+      tags: [notify]
+      operationId: NotifyController_getMyUnreadCount
+      summary: Get unread notification count for current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Unread count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 5
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /notify/read-all:
+    patch:
+      tags: [notify]
+      operationId: NotifyController_markAllRead
+      summary: Mark all visible notifications as read for current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All notifications marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  markedCount:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /notify/{notificationId}/read:
+    patch:
+      tags: [notify]
+      operationId: NotifyController_markOneRead
+      summary: Mark a single notification as read for current user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Admin Notifications (super_admin only)
+  # ─────────────────────────────────────────────────────────────────────────────
+  /admin/notifications/templates:
+    post:
+      tags: [admin-notifications]
+      operationId: AdminNotificationsController_createTemplate
+      summary: Create a predefined notification template
+      description: Requires super_admin role
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotificationTemplateDto'
+      responses:
+        '201':
+          description: Template created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationTemplate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    get:
+      tags: [admin-notifications]
+      operationId: AdminNotificationsController_listTemplates
+      summary: List predefined notification templates
+      description: Requires super_admin role
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Templates list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationTemplate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/notifications/jobs:
+    post:
+      tags: [admin-notifications]
+      operationId: AdminNotificationsController_createJob
+      summary: Create notification job (immediate or scheduled)
+      description: Requires super_admin role
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotificationJobDto'
+      responses:
+        '201':
+          description: Job created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationJob'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    get:
+      tags: [admin-notifications]
+      operationId: AdminNotificationsController_listJobs
+      summary: List notification job history
+      description: Requires super_admin role
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, scheduled, processing, completed, failed, cancelled]
+      responses:
+        '200':
+          description: Jobs list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationJobs'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/notifications/jobs/{jobId}/schedule:
+    patch:
+      tags: [admin-notifications]
+      operationId: AdminNotificationsController_scheduleJob
+      summary: Schedule an existing notification job for future dispatch
+      description: Requires super_admin role
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleNotificationJobDto'
+      responses:
+        '200':
+          description: Job scheduled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationJob'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/notifications/jobs/{jobId}/trigger:
+    post:
+      tags: [admin-notifications]
+      operationId: AdminNotificationsController_triggerJobNow
+      summary: Trigger an existing notification job immediately
+      description: Requires super_admin role
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job triggered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationJob'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from main-backend auth
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Bad Request
+        error:
+          type: string
+          example: Validation failed
+
+    NotificationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        domain:
+          type: string
+          enum: [personal, business, chat, admin]
+        isRead:
+          type: boolean
+        deepLink:
+          type: object
+          properties:
+            route:
+              type: string
+            entityId:
+              type: string
+        metadata:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+
+    PaginatedNotifications:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        unreadCount:
+          type: integer
+
+    CreateNotificationTemplateDto:
+      type: object
+      required:
+        - name
+        - titleTemplate
+        - bodyTemplate
+      properties:
+        name:
+          type: string
+          description: Unique template name
+        titleTemplate:
+          type: string
+          description: Title with {{placeholders}}
+        bodyTemplate:
+          type: string
+          description: Body with {{placeholders}}
+        domain:
+          type: string
+          enum: [personal, business, chat, admin]
+        variables:
+          type: array
+          items:
+            type: string
+          description: List of placeholder variable names
+
+    NotificationTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        titleTemplate:
+          type: string
+        bodyTemplate:
+          type: string
+        domain:
+          type: string
+        variables:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+
+    CreateNotificationJobDto:
+      type: object
+      required:
+        - title
+        - body
+        - targetType
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        templateId:
+          type: string
+          description: Use template instead of title/body
+        templateVariables:
+          type: object
+          description: Variables to substitute in template
+        targetType:
+          type: string
+          enum: [all, role, userIds]
+        targetRole:
+          type: string
+          enum: [user, business_user, business_admin, super_admin]
+        targetUserIds:
+          type: array
+          items:
+            type: string
+        scheduledAt:
+          type: string
+          format: date-time
+          description: If not provided, job runs immediately
+        deepLink:
+          type: object
+          properties:
+            route:
+              type: string
+            entityId:
+              type: string
+
+    ScheduleNotificationJobDto:
+      type: object
+      required:
+        - scheduledAt
+      properties:
+        scheduledAt:
+          type: string
+          format: date-time
+
+    NotificationJob:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        targetType:
+          type: string
+        targetRole:
+          type: string
+        targetUserIds:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, scheduled, processing, completed, failed, cancelled]
+        scheduledAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        recipientCount:
+          type: integer
+        successCount:
+          type: integer
+        failureCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+
+    PaginatedNotificationJobs:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationJob'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer

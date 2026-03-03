@@ -1,0 +1,1144 @@
+openapi: 3.0.3
+info:
+  title: ClaverIT ONDC API
+  version: 1.0.0
+  description: |
+    ONDC Buyer App APIs for product search, order lifecycle, payments, and support.
+    Implements ONDC protocol for e-commerce marketplace integration.
+  contact:
+    name: ClaverIT Support
+    email: support@claverit.com
+
+servers:
+  - url: https://claverit-ondc.onrender.com
+    description: Production
+
+tags:
+  - name: buyer
+    description: ONDC buyer protocol actions (search, select, init, confirm, etc.)
+  - name: orders
+    description: Order management
+  - name: payments
+    description: Payment processing
+  - name: support
+    description: Support ticket management
+  - name: callbacks
+    description: ONDC callback endpoints (public, no auth)
+  - name: health
+    description: Health check endpoints
+
+paths:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Health
+  # ─────────────────────────────────────────────────────────────────────────────
+  /:
+    get:
+      tags: [health]
+      operationId: AppController_health
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Buyer Protocol Actions
+  # ─────────────────────────────────────────────────────────────────────────────
+  /buyer/search:
+    post:
+      tags: [buyer]
+      operationId: BuyerController_search
+      summary: Search for products/services on ONDC network
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchDto'
+      responses:
+        '200':
+          description: Search initiated, results via on_search callback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtocolAckResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /buyer/select:
+    post:
+      tags: [buyer]
+      operationId: BuyerController_select
+      summary: Select items from a provider's catalog
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectDto'
+      responses:
+        '200':
+          description: Select initiated, quote via on_select callback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtocolAckResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /buyer/init:
+    post:
+      tags: [buyer]
+      operationId: BuyerController_init
+      summary: Initialize order with billing and delivery details
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitDto'
+      responses:
+        '200':
+          description: Init initiated, payment info via on_init callback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtocolAckResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /buyer/confirm:
+    post:
+      tags: [buyer]
+      operationId: BuyerController_confirm
+      summary: Confirm order after payment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmDto'
+      responses:
+        '200':
+          description: Confirm initiated, order via on_confirm callback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtocolAckResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /buyer/status:
+    post:
+      tags: [buyer]
+      operationId: BuyerController_status
+      summary: Get current order status
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusDto'
+      responses:
+        '200':
+          description: Status requested, update via on_status callback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtocolAckResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /buyer/track:
+    post:
+      tags: [buyer]
+      operationId: BuyerController_track
+      summary: Track order delivery
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackDto'
+      responses:
+        '200':
+          description: Track requested, tracking via on_track callback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtocolAckResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /buyer/cancel:
+    post:
+      tags: [buyer]
+      operationId: BuyerController_cancel
+      summary: Cancel an order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelDto'
+      responses:
+        '200':
+          description: Cancel requested, confirmation via on_cancel callback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtocolAckResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /buyer/support:
+    post:
+      tags: [buyer]
+      operationId: BuyerController_support
+      summary: Request support for an order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportDto'
+      responses:
+        '200':
+          description: Support requested, details via on_support callback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtocolAckResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Orders
+  # ─────────────────────────────────────────────────────────────────────────────
+  /orders:
+    get:
+      tags: [orders]
+      operationId: OrdersController_getOrders
+      summary: List orders for current user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: state
+          in: query
+          schema:
+            type: string
+            enum: [Created, Accepted, In-progress, Completed, Cancelled]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Orders list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrders'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /orders/{orderId}:
+    get:
+      tags: [orders]
+      operationId: OrdersController_getOrder
+      summary: Get order details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{orderId}/callbacks:
+    get:
+      tags: [orders]
+      operationId: OrdersController_getOrderCallbacks
+      summary: Get callbacks related to an order
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order callbacks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CallbackRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Payments
+  # ─────────────────────────────────────────────────────────────────────────────
+  /payments/order/{orderId}:
+    get:
+      tags: [payments]
+      operationId: PaymentsController_getPaymentByOrder
+      summary: Get payment info for an order
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payment info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /payments/confirm:
+    post:
+      tags: [payments]
+      operationId: PaymentsController_confirmPayment
+      summary: Confirm payment for an order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmPaymentDto'
+      responses:
+        '200':
+          description: Payment confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Support
+  # ─────────────────────────────────────────────────────────────────────────────
+  /support:
+    get:
+      tags: [support]
+      operationId: SupportController_getSupportRequests
+      summary: List support requests for current user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, in_progress, resolved, closed]
+      responses:
+        '200':
+          description: Support requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SupportRequestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [support]
+      operationId: SupportController_createSupportRequest
+      summary: Create a support request
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSupportRequestDto'
+      responses:
+        '201':
+          description: Support request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /support/{requestId}:
+    get:
+      tags: [support]
+      operationId: SupportController_getSupportRequest
+      summary: Get support request details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Support request details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /support/{requestId}/respond:
+    post:
+      tags: [support]
+      operationId: SupportController_addResponse
+      summary: Add a response to a support request
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+      responses:
+        '200':
+          description: Response added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # ONDC Callbacks (Public - No Auth Required)
+  # ─────────────────────────────────────────────────────────────────────────────
+  /callbacks/on_search:
+    post:
+      tags: [callbacks]
+      operationId: CallbacksController_onSearch
+      summary: ONDC on_search callback
+      description: Public endpoint for ONDC network callbacks. Requires ONDC signature verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OndcCallbackRequest'
+      responses:
+        '200':
+          description: Callback acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OndcAckResponse'
+
+  /callbacks/on_select:
+    post:
+      tags: [callbacks]
+      operationId: CallbacksController_onSelect
+      summary: ONDC on_select callback
+      description: Public endpoint for ONDC network callbacks. Requires ONDC signature verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OndcCallbackRequest'
+      responses:
+        '200':
+          description: Callback acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OndcAckResponse'
+
+  /callbacks/on_init:
+    post:
+      tags: [callbacks]
+      operationId: CallbacksController_onInit
+      summary: ONDC on_init callback
+      description: Public endpoint for ONDC network callbacks. Requires ONDC signature verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OndcCallbackRequest'
+      responses:
+        '200':
+          description: Callback acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OndcAckResponse'
+
+  /callbacks/on_confirm:
+    post:
+      tags: [callbacks]
+      operationId: CallbacksController_onConfirm
+      summary: ONDC on_confirm callback
+      description: Public endpoint for ONDC network callbacks. Requires ONDC signature verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OndcCallbackRequest'
+      responses:
+        '200':
+          description: Callback acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OndcAckResponse'
+
+  /callbacks/on_status:
+    post:
+      tags: [callbacks]
+      operationId: CallbacksController_onStatus
+      summary: ONDC on_status callback
+      description: Public endpoint for ONDC network callbacks. Requires ONDC signature verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OndcCallbackRequest'
+      responses:
+        '200':
+          description: Callback acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OndcAckResponse'
+
+  /callbacks/on_track:
+    post:
+      tags: [callbacks]
+      operationId: CallbacksController_onTrack
+      summary: ONDC on_track callback
+      description: Public endpoint for ONDC network callbacks. Requires ONDC signature verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OndcCallbackRequest'
+      responses:
+        '200':
+          description: Callback acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OndcAckResponse'
+
+  /callbacks/on_cancel:
+    post:
+      tags: [callbacks]
+      operationId: CallbacksController_onCancel
+      summary: ONDC on_cancel callback
+      description: Public endpoint for ONDC network callbacks. Requires ONDC signature verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OndcCallbackRequest'
+      responses:
+        '200':
+          description: Callback acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OndcAckResponse'
+
+  /callbacks/on_support:
+    post:
+      tags: [callbacks]
+      operationId: CallbacksController_onSupport
+      summary: ONDC on_support callback
+      description: Public endpoint for ONDC network callbacks. Requires ONDC signature verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OndcCallbackRequest'
+      responses:
+        '200':
+          description: Callback acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OndcAckResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from main-backend auth
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Bad Request
+        error:
+          type: string
+          example: Validation failed
+
+    ProtocolAckResponse:
+      type: object
+      properties:
+        context:
+          type: object
+          properties:
+            transaction_id:
+              type: string
+            message_id:
+              type: string
+        message:
+          type: object
+          properties:
+            ack:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [ACK, NACK]
+
+    SearchDto:
+      type: object
+      required:
+        - city
+      properties:
+        city:
+          type: string
+          description: City code
+        query:
+          type: string
+          description: Search query
+        category:
+          type: string
+          description: Category filter
+        domain:
+          type: string
+          description: ONDC domain (e.g., ONDC:RET10)
+        fulfillmentType:
+          type: string
+          enum: [Delivery, Pickup]
+
+    SelectDto:
+      type: object
+      required:
+        - transactionId
+        - city
+        - providerId
+        - bppId
+        - bppUri
+        - items
+      properties:
+        transactionId:
+          type: string
+        city:
+          type: string
+        providerId:
+          type: string
+        bppId:
+          type: string
+        bppUri:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              quantity:
+                type: integer
+        fulfillmentId:
+          type: string
+        domain:
+          type: string
+
+    InitDto:
+      type: object
+      required:
+        - transactionId
+        - city
+        - bppId
+        - bppUri
+        - items
+        - billing
+        - deliveryAddress
+      properties:
+        transactionId:
+          type: string
+        city:
+          type: string
+        bppId:
+          type: string
+        bppUri:
+          type: string
+        providerId:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              quantity:
+                type: integer
+        billing:
+          $ref: '#/components/schemas/BillingInfo'
+        deliveryAddress:
+          $ref: '#/components/schemas/DeliveryAddress'
+        domain:
+          type: string
+
+    ConfirmDto:
+      type: object
+      required:
+        - transactionId
+        - city
+        - bppId
+        - bppUri
+        - items
+        - billing
+        - payment
+        - fulfillments
+      properties:
+        transactionId:
+          type: string
+        city:
+          type: string
+        bppId:
+          type: string
+        bppUri:
+          type: string
+        providerId:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+        billing:
+          $ref: '#/components/schemas/BillingInfo'
+        payment:
+          $ref: '#/components/schemas/PaymentInfo'
+        fulfillments:
+          type: array
+          items:
+            type: object
+        domain:
+          type: string
+
+    StatusDto:
+      type: object
+      required:
+        - orderId
+        - city
+      properties:
+        orderId:
+          type: string
+        city:
+          type: string
+        domain:
+          type: string
+
+    TrackDto:
+      type: object
+      required:
+        - orderId
+        - city
+      properties:
+        orderId:
+          type: string
+        city:
+          type: string
+        domain:
+          type: string
+
+    CancelDto:
+      type: object
+      required:
+        - orderId
+        - city
+        - reason
+      properties:
+        orderId:
+          type: string
+        city:
+          type: string
+        reason:
+          type: string
+        reasonCode:
+          type: string
+        domain:
+          type: string
+
+    SupportDto:
+      type: object
+      required:
+        - orderId
+        - city
+      properties:
+        orderId:
+          type: string
+        city:
+          type: string
+        domain:
+          type: string
+
+    BillingInfo:
+      type: object
+      required:
+        - name
+        - phone
+        - email
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        address:
+          type: string
+
+    DeliveryAddress:
+      type: object
+      required:
+        - name
+        - phone
+        - address
+        - city
+        - state
+        - pincode
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        pincode:
+          type: string
+        gps:
+          type: string
+          description: "lat,lng format"
+
+    PaymentInfo:
+      type: object
+      required:
+        - type
+        - status
+      properties:
+        type:
+          type: string
+          enum: [ON-ORDER, ON-FULFILLMENT, PRE-FULFILLMENT]
+        status:
+          type: string
+          enum: [PENDING, PAID, FAILED]
+        transactionId:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+          default: INR
+
+    OrderResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        transactionId:
+          type: string
+        userId:
+          type: string
+        state:
+          type: string
+          enum: [Created, Accepted, In-progress, Completed, Cancelled]
+        provider:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+        items:
+          type: array
+          items:
+            type: object
+        quote:
+          type: object
+        billing:
+          $ref: '#/components/schemas/BillingInfo'
+        fulfillments:
+          type: array
+          items:
+            type: object
+        payment:
+          $ref: '#/components/schemas/PaymentInfo'
+        domain:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PaginatedOrders:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponse'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    CallbackRecord:
+      type: object
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+        transactionId:
+          type: string
+        messageId:
+          type: string
+        payload:
+          type: object
+        processedAt:
+          type: string
+          format: date-time
+
+    PaymentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        orderId:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, PAID, FAILED]
+        transactionId:
+          type: string
+        upiUri:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        confirmedAt:
+          type: string
+          format: date-time
+
+    ConfirmPaymentDto:
+      type: object
+      required:
+        - orderId
+        - transactionId
+      properties:
+        orderId:
+          type: string
+        transactionId:
+          type: string
+
+    SupportRequestResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        orderId:
+          type: string
+        userId:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [open, in_progress, resolved, closed]
+        responses:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              sender:
+                type: string
+                enum: [buyer, seller]
+              timestamp:
+                type: string
+                format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateSupportRequestDto:
+      type: object
+      required:
+        - orderId
+        - type
+        - description
+      properties:
+        orderId:
+          type: string
+        type:
+          type: string
+          description: Issue type (e.g., delivery, quality, refund)
+        description:
+          type: string
+
+    OndcCallbackRequest:
+      type: object
+      description: ONDC protocol callback request body
+      properties:
+        context:
+          type: object
+        message:
+          type: object
+
+    OndcAckResponse:
+      type: object
+      properties:
+        message:
+          type: object
+          properties:
+            ack:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [ACK, NACK]

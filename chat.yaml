@@ -1,0 +1,998 @@
+openapi: 3.0.3
+info:
+  title: ClaverIT Chat API
+  version: 1.0.0
+  description: |
+    Chat service REST APIs for conversations, messages, groups, and friends.
+    WebSocket protocol is documented separately in websocket.md.
+  contact:
+    name: ClaverIT Support
+    email: support@claverit.com
+
+servers:
+  - url: https://claverit-chat-backend.onrender.com
+    description: Production
+
+tags:
+  - name: conversations
+    description: Conversation management
+  - name: messages
+    description: Message sending and management
+  - name: groups
+    description: Group chat management
+  - name: friends
+    description: Friend requests and management
+  - name: notifications
+    description: Chat notifications
+  - name: health
+    description: Health check endpoints
+
+paths:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Health
+  # ─────────────────────────────────────────────────────────────────────────────
+  /health:
+    get:
+      tags: [health]
+      operationId: HealthController_check
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Conversations
+  # ─────────────────────────────────────────────────────────────────────────────
+  /chat/conversations:
+    get:
+      tags: [conversations]
+      operationId: ChatController_getConversations
+      summary: Get all conversations for current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Conversations list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConversationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [conversations]
+      operationId: ChatController_createConversation
+      summary: Create a new conversation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConversationDto'
+      responses:
+        '201':
+          description: Conversation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/conversations/{id}:
+    get:
+      tags: [conversations]
+      operationId: ChatController_getConversation
+      summary: Get a specific conversation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /chat/conversations/direct:
+    post:
+      tags: [conversations]
+      operationId: ChatController_startDirectConversation
+      summary: Start a direct conversation with a user by email
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartDirectConversationDto'
+      responses:
+        '201':
+          description: Direct conversation started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/conversations/{id}/messages:
+    get:
+      tags: [messages]
+      operationId: ChatController_getMessages
+      summary: Get messages for a conversation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: before
+          in: query
+          schema:
+            type: string
+          description: Message ID to fetch messages before (pagination)
+      responses:
+        '200':
+          description: Messages list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/conversations/{id}/read:
+    post:
+      tags: [conversations]
+      operationId: ChatController_markRead
+      summary: Mark conversation as read
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Messages
+  # ─────────────────────────────────────────────────────────────────────────────
+  /chat/messages:
+    post:
+      tags: [messages]
+      operationId: ChatController_sendMessage
+      summary: Send a text message
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMessageDto'
+      responses:
+        '201':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/messages/media:
+    post:
+      tags: [messages]
+      operationId: ChatController_sendMediaMessage
+      summary: Send a media message with files
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                conversation_id:
+                  type: string
+                content:
+                  type: string
+                client_message_id:
+                  type: string
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  maxItems: 5
+              required:
+                - conversation_id
+                - files
+      responses:
+        '201':
+          description: Media message sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/messages/{id}:
+    put:
+      tags: [messages]
+      operationId: ChatController_updateMessage
+      summary: Update a message
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMessageDto'
+      responses:
+        '200':
+          description: Message updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      tags: [messages]
+      operationId: ChatController_deleteMessage
+      summary: Delete a message
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Message deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Groups
+  # ─────────────────────────────────────────────────────────────────────────────
+  /chat/groups:
+    post:
+      tags: [groups]
+      operationId: ChatController_createGroupChat
+      summary: Create a group chat
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupChatDto'
+      responses:
+        '201':
+          description: Group created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/groups/{id}:
+    put:
+      tags: [groups]
+      operationId: ChatController_updateGroupChat
+      summary: Update group chat details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroupChatDto'
+      responses:
+        '200':
+          description: Group updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/groups/{id}/members:
+    get:
+      tags: [groups]
+      operationId: ChatController_getGroupMembers
+      summary: Get group members
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupMember'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [groups]
+      operationId: ChatController_addGroupMembers
+      summary: Add members to group
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddGroupMembersDto'
+      responses:
+        '200':
+          description: Members added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  addedUserIds:
+                    type: array
+                    items:
+                      type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/groups/{id}/members/{userId}:
+    delete:
+      tags: [groups]
+      operationId: ChatController_removeGroupMember
+      summary: Remove a member from group
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Member removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  removed:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Friends
+  # ─────────────────────────────────────────────────────────────────────────────
+  /chat/friends/requests:
+    post:
+      tags: [friends]
+      operationId: ChatController_sendFriendRequest
+      summary: Send a friend request
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendFriendRequestDto'
+      responses:
+        '201':
+          description: Friend request sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/friends/requests/incoming:
+    get:
+      tags: [friends]
+      operationId: ChatController_listIncomingFriendRequests
+      summary: List incoming friend requests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Incoming requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FriendRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/friends/requests/outgoing:
+    get:
+      tags: [friends]
+      operationId: ChatController_listOutgoingFriendRequests
+      summary: List outgoing friend requests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Outgoing requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FriendRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/friends/requests/{id}/accept:
+    post:
+      tags: [friends]
+      operationId: ChatController_acceptFriendRequest
+      summary: Accept a friend request
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Friend request accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/friends/requests/{id}/reject:
+    post:
+      tags: [friends]
+      operationId: ChatController_rejectFriendRequest
+      summary: Reject a friend request
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Friend request rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/friends/search-by-phone:
+    get:
+      tags: [friends]
+      operationId: ChatController_searchFriendByPhone
+      summary: Search friend by phone number
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: phone
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSearchResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # User Search & Profile
+  # ─────────────────────────────────────────────────────────────────────────────
+  /chat/users/search:
+    get:
+      tags: [friends]
+      operationId: ChatController_searchUsers
+      summary: Search users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserSearchResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/profile-picture/sync:
+    post:
+      tags: [friends]
+      operationId: ChatController_syncProfilePicture
+      summary: Sync profile picture to friends
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile picture synced
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  profileImageUrl:
+                    type: string
+                  friendCount:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Chat Notifications
+  # ─────────────────────────────────────────────────────────────────────────────
+  /chat/notifications:
+    get:
+      tags: [notifications]
+      operationId: ChatController_getChatNotifications
+      summary: Get chat notifications
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Chat notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatNotification'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/notifications/{id}/read:
+    post:
+      tags: [notifications]
+      operationId: ChatController_markChatNotificationRead
+      summary: Mark chat notification as read
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from main-backend auth
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Bad Request
+        error:
+          type: string
+          example: Validation failed
+
+    ConversationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [direct, group]
+        name:
+          type: string
+          nullable: true
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Participant'
+        lastMessage:
+          $ref: '#/components/schemas/MessageResponse'
+        unreadCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Participant:
+      type: object
+      properties:
+        userId:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        profileImageUrl:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [member, admin, owner]
+
+    CreateConversationDto:
+      type: object
+      required:
+        - participantIds
+      properties:
+        participantIds:
+          type: array
+          items:
+            type: string
+        name:
+          type: string
+
+    StartDirectConversationDto:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+
+    MessageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        conversation_id:
+          type: string
+        sender_id:
+          type: string
+        content:
+          type: string
+        message_type:
+          type: string
+          enum: [text, image, file, system]
+        status:
+          type: string
+          enum: [sent, delivered, read]
+        client_message_id:
+          type: string
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaItem'
+        sender:
+          $ref: '#/components/schemas/Participant'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    MediaItem:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+        type:
+          type: string
+          enum: [image, video, audio, file]
+        filename:
+          type: string
+        size:
+          type: integer
+        mimeType:
+          type: string
+
+    CreateMessageDto:
+      type: object
+      required:
+        - conversation_id
+        - content
+      properties:
+        conversation_id:
+          type: string
+        content:
+          type: string
+        client_message_id:
+          type: string
+
+    UpdateMessageDto:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+
+    CreateGroupChatDto:
+      type: object
+      required:
+        - name
+        - memberIds
+      properties:
+        name:
+          type: string
+        memberIds:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+
+    UpdateGroupChatDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    GroupMember:
+      type: object
+      properties:
+        userId:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        profileImageUrl:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [member, admin, owner]
+        joinedAt:
+          type: string
+          format: date-time
+
+    AddGroupMembersDto:
+      type: object
+      required:
+        - userIds
+      properties:
+        userIds:
+          type: array
+          items:
+            type: string
+
+    SendFriendRequestDto:
+      type: object
+      required:
+        - receiverUserId
+      properties:
+        receiverUserId:
+          type: string
+
+    FriendRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        senderId:
+          type: string
+        receiverId:
+          type: string
+        status:
+          type: string
+          enum: [pending, accepted, rejected]
+        sender:
+          $ref: '#/components/schemas/UserSearchResult'
+        receiver:
+          $ref: '#/components/schemas/UserSearchResult'
+        createdAt:
+          type: string
+          format: date-time
+
+    UserSearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        profileImageUrl:
+          type: string
+          nullable: true
+
+    ChatNotification:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        conversationId:
+          type: string
+        messageId:
+          type: string
+        senderId:
+          type: string
+        preview:
+          type: string
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time

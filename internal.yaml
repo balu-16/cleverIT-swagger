@@ -1,0 +1,466 @@
+openapi: 3.0.3
+info:
+  title: ClaverIT Internal APIs
+  version: 1.0.0
+  description: |
+    **INTERNAL USE ONLY - NOT FOR PUBLIC CONSUMPTION**
+    
+    Internal service-to-service communication endpoints.
+    These endpoints are protected by internal tokens and should never be exposed to end users.
+  contact:
+    name: ClaverIT Engineering
+    email: engineering@claverit.com
+
+servers:
+  - url: https://claverit-notifications.vercel.app/api
+    description: Notify Service (Internal)
+
+tags:
+  - name: notify-internal
+    description: Internal notification dispatch endpoints
+  - name: preferences-internal
+    description: Internal notification preferences management
+  - name: personal-notifications-internal
+    description: Internal personal notification event queue
+
+security:
+  - internalToken: []
+
+paths:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Notify Internal - Chat Event Dispatch
+  # ─────────────────────────────────────────────────────────────────────────────
+  /notifications/internal/chat-event:
+    post:
+      tags: [notify-internal]
+      operationId: NotificationsController_dispatchChatEvent
+      summary: Internal bridge endpoint for chat domain notification events
+      description: |
+        Called by chat-backend to dispatch push notifications for chat events.
+        Requires internal token authentication via x-internal-token header.
+      security:
+        - internalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatNotificationEventDto'
+      responses:
+        '202':
+          description: Chat event accepted for push dispatch
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accepted:
+                    type: boolean
+                    example: true
+                  pushSent:
+                    type: boolean
+                  recipientCount:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Preferences Internal
+  # ─────────────────────────────────────────────────────────────────────────────
+  /notifications/preferences:
+    get:
+      tags: [preferences-internal]
+      operationId: PreferencesController_get
+      summary: Get notification preferences for a user (internal)
+      description: Requires x-user-id header to identify the target user.
+      security:
+        - internalToken: []
+      parameters:
+        - name: x-user-id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      tags: [preferences-internal]
+      operationId: PreferencesController_update
+      summary: Update notification preferences (internal)
+      description: Requires x-user-id header to identify the target user.
+      security:
+        - internalToken: []
+      parameters:
+        - name: x-user-id
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNotificationPreferencesDto'
+      responses:
+        '200':
+          description: Preferences updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /notifications/preferences/mute:
+    post:
+      tags: [preferences-internal]
+      operationId: PreferencesController_mute
+      summary: Mute an entity (conversation/business/user) (internal)
+      description: Requires x-user-id header to identify the target user.
+      security:
+        - internalToken: []
+      parameters:
+        - name: x-user-id
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MuteEntityDto'
+      responses:
+        '200':
+          description: Entity muted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /notifications/preferences/unmute:
+    post:
+      tags: [preferences-internal]
+      operationId: PreferencesController_unmute
+      summary: Unmute an entity (conversation/business/user) (internal)
+      description: Requires x-user-id header to identify the target user.
+      security:
+        - internalToken: []
+      parameters:
+        - name: x-user-id
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnmuteEntityDto'
+      responses:
+        '200':
+          description: Entity unmuted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Personal Notifications Internal
+  # ─────────────────────────────────────────────────────────────────────────────
+  /personal/notifications/internal/events:
+    post:
+      tags: [personal-notifications-internal]
+      operationId: PersonalNotificationController_createInternalEvent
+      summary: Queue a personal notification event (internal)
+      description: |
+        Called by other services to queue personal domain notifications.
+        Requires internal token authentication.
+      security:
+        - internalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePersonalNotificationEventDto'
+      responses:
+        '202':
+          description: Personal notification event accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accepted:
+                    type: boolean
+                  queued:
+                    type: boolean
+                  userId:
+                    type: string
+                  type:
+                    type: string
+                  idempotencyKey:
+                    type: string
+                  eventId:
+                    type: string
+                    nullable: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    internalToken:
+      type: apiKey
+      in: header
+      name: x-internal-token
+      description: Internal service-to-service authentication token
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing internal token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 401
+        message:
+          type: string
+          example: Unauthorized
+        error:
+          type: string
+          example: Invalid internal token
+
+    ChatNotificationEventDto:
+      type: object
+      required:
+        - type
+        - conversationId
+        - senderId
+        - recipientIds
+      properties:
+        type:
+          type: string
+          enum: [new_message, message_reaction, group_invite, friend_request]
+        conversationId:
+          type: string
+        messageId:
+          type: string
+        senderId:
+          type: string
+        senderName:
+          type: string
+        recipientIds:
+          type: array
+          items:
+            type: string
+        preview:
+          type: string
+          description: Message preview text
+        metadata:
+          type: object
+
+    NotificationPreferences:
+      type: object
+      properties:
+        userId:
+          type: string
+        channels:
+          type: object
+          properties:
+            push:
+              type: boolean
+            email:
+              type: boolean
+            sms:
+              type: boolean
+        domains:
+          type: object
+          properties:
+            personal:
+              type: boolean
+            business:
+              type: boolean
+            chat:
+              type: boolean
+            admin:
+              type: boolean
+        quietHours:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            start:
+              type: string
+              description: "HH:mm format"
+            end:
+              type: string
+              description: "HH:mm format"
+            timezone:
+              type: string
+        mutedEntities:
+          type: array
+          items:
+            type: object
+            properties:
+              entityType:
+                type: string
+                enum: [conversation, business, user]
+              entityId:
+                type: string
+              mutedUntil:
+                type: string
+                format: date-time
+                nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateNotificationPreferencesDto:
+      type: object
+      properties:
+        channels:
+          type: object
+          properties:
+            push:
+              type: boolean
+            email:
+              type: boolean
+            sms:
+              type: boolean
+        domains:
+          type: object
+          properties:
+            personal:
+              type: boolean
+            business:
+              type: boolean
+            chat:
+              type: boolean
+            admin:
+              type: boolean
+        quietHours:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            start:
+              type: string
+            end:
+              type: string
+            timezone:
+              type: string
+
+    MuteEntityDto:
+      type: object
+      required:
+        - entityType
+        - entityId
+      properties:
+        entityType:
+          type: string
+          enum: [conversation, business, user]
+        entityId:
+          type: string
+        duration:
+          type: string
+          description: Duration in ISO 8601 format (e.g., PT1H, P1D) or null for permanent
+
+    UnmuteEntityDto:
+      type: object
+      required:
+        - entityType
+        - entityId
+      properties:
+        entityType:
+          type: string
+          enum: [conversation, business, user]
+        entityId:
+          type: string
+
+    CreatePersonalNotificationEventDto:
+      type: object
+      required:
+        - userId
+        - type
+        - title
+        - body
+      properties:
+        userId:
+          type: string
+        type:
+          type: string
+          description: Notification type (e.g., appointment_confirmed, blood_request_match)
+        entityId:
+          type: string
+          description: Related entity ID
+        title:
+          type: string
+        body:
+          type: string
+        metadata:
+          type: object
+          nullable: true
+        deepLink:
+          type: object
+          properties:
+            route:
+              type: string
+            entityId:
+              type: string
+            metadata:
+              type: object
+        scheduledAt:
+          type: string
+          format: date-time
+          description: Schedule for future delivery
+        idempotencyKey:
+          type: string
+          description: Unique key to prevent duplicate notifications
+        targetRole:
+          type: string
+          enum: [user, business_user, business_admin, super_admin]
+        internalOnly:
+          type: boolean
+          description: If true, notification is not sent as push

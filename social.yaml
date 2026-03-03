@@ -1,0 +1,1327 @@
+openapi: 3.0.3
+info:
+  title: ClaverIT Social API
+  version: 1.0.0
+  description: |
+    Social domain APIs including appointments, blood donation, badges, and business management.
+    Handles personal appointments, business appointments, blood requests, donor management, and business profiles.
+  contact:
+    name: ClaverIT Support
+    email: support@claverit.com
+
+servers:
+  - url: https://claverit-social.vercel.app/api
+    description: Production
+
+tags:
+  - name: appointments
+    description: General appointment creation and listing
+  - name: personal-appointments
+    description: Personal mode appointment slot and request management
+  - name: business-appointments
+    description: Business owner appointment management
+  - name: personal-blood
+    description: Personal blood donation and requests
+  - name: badges
+    description: User badge management
+  - name: business
+    description: Business profile and mode switching
+  - name: health
+    description: Health check endpoints
+
+paths:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Health
+  # ─────────────────────────────────────────────────────────────────────────────
+  /health:
+    get:
+      tags: [health]
+      operationId: AppController_health
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # General Appointments
+  # ─────────────────────────────────────────────────────────────────────────────
+  /social/appointments:
+    post:
+      tags: [appointments]
+      operationId: AppointmentsController_createAppointment
+      summary: Create appointment request for a business service
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAppointmentDto'
+      responses:
+        '201':
+          description: Appointment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/appointments/me:
+    get:
+      tags: [appointments]
+      operationId: AppointmentsController_listMyAppointments
+      summary: List my appointments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [REQUESTED, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Appointments list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAppointments'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/appointments/{id}/cancel:
+    post:
+      tags: [appointments]
+      operationId: AppointmentsController_cancelMyAppointment
+      summary: Cancel my appointment within cancellation window
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Appointment cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Personal Appointments
+  # ─────────────────────────────────────────────────────────────────────────────
+  /social/personal/appointments/slots:
+    post:
+      tags: [personal-appointments]
+      operationId: PersonalAppointmentsController_createSlot
+      summary: Create provider appointment slot
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAppointmentSlotDto'
+      responses:
+        '201':
+          description: Slot created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentSlotResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/appointments/slots/{slotUuid}:
+    delete:
+      tags: [personal-appointments]
+      operationId: PersonalAppointmentsController_deleteSlot
+      summary: Delete my unbooked appointment slot
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: slotUuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Slot deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /social/personal/appointments/slots/mine:
+    get:
+      tags: [personal-appointments]
+      operationId: PersonalAppointmentsController_listMySlots
+      summary: List my active provider slots
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: My slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentSlotResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/appointments/slots/available:
+    get:
+      tags: [personal-appointments]
+      operationId: PersonalAppointmentsController_listAvailableSlots
+      summary: List available slots for a provider UUID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: providerUuid
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Available slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentSlotResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/appointments/slots/reschedule/{appointmentUuid}:
+    get:
+      tags: [personal-appointments]
+      operationId: PersonalAppointmentsController_listRescheduleSlots
+      summary: List available replacement slots for an appointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appointmentUuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Available reschedule slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentSlotResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/appointments/request:
+    post:
+      tags: [personal-appointments]
+      operationId: PersonalAppointmentsController_requestAppointment
+      summary: Request appointment using available slot
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestAppointmentDto'
+      responses:
+        '201':
+          description: Appointment requested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/appointments/transition:
+    post:
+      tags: [personal-appointments]
+      operationId: PersonalAppointmentsController_transitionAppointment
+      summary: Transition appointment status with strict state machine
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransitionAppointmentDto'
+      responses:
+        '200':
+          description: Appointment transitioned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/appointments/reschedule:
+    post:
+      tags: [personal-appointments]
+      operationId: PersonalAppointmentsController_reschedule
+      summary: Reschedule appointment preserving history
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RescheduleAppointmentDto'
+      responses:
+        '200':
+          description: Appointment rescheduled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/appointments/{appointmentUuid}:
+    delete:
+      tags: [personal-appointments]
+      operationId: PersonalAppointmentsController_deleteAppointment
+      summary: Delete my appointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appointmentUuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Appointment deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/appointments/mine:
+    get:
+      tags: [personal-appointments]
+      operationId: PersonalAppointmentsController_listMine
+      summary: List my appointments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: My appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Business Appointments
+  # ─────────────────────────────────────────────────────────────────────────────
+  /social/business/appointments/upcoming:
+    get:
+      tags: [business-appointments]
+      operationId: BusinessAppointmentsController_listUpcoming
+      summary: List upcoming appointments for business owner
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [REQUESTED, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Upcoming appointments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAppointments'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /social/business/appointments/past:
+    get:
+      tags: [business-appointments]
+      operationId: BusinessAppointmentsController_listPast
+      summary: List past appointments for business owner
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [REQUESTED, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Past appointments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAppointments'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /social/business/appointments/{id}/confirm:
+    post:
+      tags: [business-appointments]
+      operationId: BusinessAppointmentsController_confirm
+      summary: Confirm appointment request
+      description: Rate limited to 30 requests per 60 seconds
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Appointment confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /social/business/appointments/{id}/cancel:
+    post:
+      tags: [business-appointments]
+      operationId: BusinessAppointmentsController_cancel
+      summary: Cancel appointment by business
+      description: Rate limited to 30 requests per 60 seconds
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Appointment cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /social/business/appointments/{id}/complete:
+    post:
+      tags: [business-appointments]
+      operationId: BusinessAppointmentsController_complete
+      summary: Mark appointment as completed
+      description: Rate limited to 30 requests per 60 seconds
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Appointment completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /social/business/appointments/{id}/no-show:
+    post:
+      tags: [business-appointments]
+      operationId: BusinessAppointmentsController_noShow
+      summary: Mark appointment as no-show
+      description: Rate limited to 30 requests per 60 seconds
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Appointment marked as no-show
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /social/business/appointments/{id}/status-logs:
+    get:
+      tags: [business-appointments]
+      operationId: BusinessAppointmentsController_getStatusLogs
+      summary: List appointment status transition logs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentStatusLog'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Personal Blood
+  # ─────────────────────────────────────────────────────────────────────────────
+  /social/personal/blood/impact:
+    get:
+      tags: [personal-blood]
+      operationId: BloodController_getImpact
+      summary: Get public blood impact counters
+      responses:
+        '200':
+          description: Impact counters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BloodImpactResponse'
+
+  /social/personal/blood/donor/register:
+    post:
+      tags: [personal-blood]
+      operationId: BloodControllerAuth_registerDonor
+      summary: Register/update donor profile with encrypted health metadata
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDonorDto'
+      responses:
+        '201':
+          description: Donor registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonorProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/blood/donor/me:
+    get:
+      tags: [personal-blood]
+      operationId: BloodControllerAuth_getMyDonorProfile
+      summary: Get own donor profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Donor profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonorProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/blood/donor/history:
+    post:
+      tags: [personal-blood]
+      operationId: BloodControllerAuth_addDonationHistory
+      summary: Add donation history and recalculate eligibility/badges
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddDonationHistoryDto'
+      responses:
+        '201':
+          description: History added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonorProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/blood/requests:
+    post:
+      tags: [personal-blood]
+      operationId: BloodControllerAuth_createRequest
+      summary: Create personal blood request
+      description: Rate limited to 5 requests per 60 seconds
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePersonalBloodRequestDto'
+      responses:
+        '201':
+          description: Blood request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BloodRequestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /social/personal/blood/requests/mine:
+    get:
+      tags: [personal-blood]
+      operationId: BloodControllerAuth_listMyRequests
+      summary: List own personal blood requests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: My blood requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BloodRequestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/blood/requests/{requestUuid}/search-donors:
+    post:
+      tags: [personal-blood]
+      operationId: BloodControllerAuth_searchDonors
+      summary: Search nearby donors for own active blood request by radius
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: requestUuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchDonorsForRequestDto'
+      responses:
+        '200':
+          description: Matching donors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DonorSearchResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /social/personal/blood/requests/emergency-alert:
+    post:
+      tags: [personal-blood]
+      operationId: BloodControllerAuth_triggerAlert
+      summary: Trigger emergency blood alert broadcast with idempotency
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TriggerEmergencyAlertDto'
+      responses:
+        '200':
+          description: Alert triggered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  alertId:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Badges
+  # ─────────────────────────────────────────────────────────────────────────────
+  /badges/my:
+    get:
+      tags: [badges]
+      operationId: BadgesController_getMyBadges
+      summary: Get all my badges
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: My badges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Badge'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /badges/definitions:
+    get:
+      tags: [badges]
+      operationId: BadgesController_getDefinitions
+      summary: List all possible badge definitions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Badge definitions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BadgeDefinition'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /badges/user/{userId}:
+    get:
+      tags: [badges]
+      operationId: BadgesController_getUserBadges
+      summary: Get another user's badges (public)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User badges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Badge'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Business Profile
+  # ─────────────────────────────────────────────────────────────────────────────
+  /business/profile:
+    post:
+      tags: [business]
+      operationId: BusinessProfileController_create
+      summary: Create business profile for authenticated owner
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBusinessDto'
+      responses:
+        '201':
+          description: Business created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /business/profile/mode:
+    patch:
+      tags: [business]
+      operationId: BusinessProfileController_switchMode
+      summary: Switch workspace mode for authenticated business owner
+      description: Rate limited to 5 requests per 60 seconds
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SwitchBusinessModeDto'
+      responses:
+        '200':
+          description: Mode switched
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mode:
+                    type: string
+                    enum: [personal, business]
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from main-backend auth
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    TooManyRequests:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Bad Request
+        error:
+          type: string
+          example: Validation failed
+
+    CreateAppointmentDto:
+      type: object
+      required:
+        - businessId
+        - serviceId
+        - scheduledAt
+      properties:
+        businessId:
+          type: string
+        serviceId:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+
+    AppointmentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        uuid:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [REQUESTED, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW]
+        scheduledAt:
+          type: string
+          format: date-time
+        businessId:
+          type: string
+        serviceId:
+          type: string
+        userId:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PaginatedAppointments:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppointmentResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    CreateAppointmentSlotDto:
+      type: object
+      required:
+        - startTime
+        - endTime
+      properties:
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        serviceType:
+          type: string
+        maxCapacity:
+          type: integer
+          default: 1
+
+    AppointmentSlotResponse:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        providerUuid:
+          type: string
+          format: uuid
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        serviceType:
+          type: string
+        isBooked:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    RequestAppointmentDto:
+      type: object
+      required:
+        - slotUuid
+      properties:
+        slotUuid:
+          type: string
+          format: uuid
+        notes:
+          type: string
+
+    TransitionAppointmentDto:
+      type: object
+      required:
+        - appointmentUuid
+        - toStatus
+      properties:
+        appointmentUuid:
+          type: string
+          format: uuid
+        toStatus:
+          type: string
+          enum: [CONFIRMED, COMPLETED, CANCELLED, NO_SHOW]
+        reason:
+          type: string
+
+    RescheduleAppointmentDto:
+      type: object
+      required:
+        - appointmentUuid
+        - newSlotUuid
+      properties:
+        appointmentUuid:
+          type: string
+          format: uuid
+        newSlotUuid:
+          type: string
+          format: uuid
+        reason:
+          type: string
+
+    AppointmentStatusLog:
+      type: object
+      properties:
+        fromStatus:
+          type: string
+        toStatus:
+          type: string
+        reason:
+          type: string
+        triggeredBy:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    BloodImpactResponse:
+      type: object
+      properties:
+        totalDonors:
+          type: integer
+        totalDonations:
+          type: integer
+        livesImpacted:
+          type: integer
+
+    RegisterDonorDto:
+      type: object
+      required:
+        - bloodGroup
+      properties:
+        bloodGroup:
+          type: string
+          enum: [A+, A-, B+, B-, AB+, AB-, O+, O-]
+        location:
+          type: object
+          properties:
+            lat:
+              type: number
+            lng:
+              type: number
+            city:
+              type: string
+        healthMetadata:
+          type: object
+
+    DonorProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        bloodGroup:
+          type: string
+        isEligible:
+          type: boolean
+        lastDonationDate:
+          type: string
+          format: date-time
+        totalDonations:
+          type: integer
+        badges:
+          type: array
+          items:
+            type: string
+
+    AddDonationHistoryDto:
+      type: object
+      required:
+        - donationDate
+      properties:
+        donationDate:
+          type: string
+          format: date-time
+        location:
+          type: string
+        notes:
+          type: string
+
+    CreatePersonalBloodRequestDto:
+      type: object
+      required:
+        - bloodGroup
+        - urgency
+      properties:
+        bloodGroup:
+          type: string
+          enum: [A+, A-, B+, B-, AB+, AB-, O+, O-]
+        urgency:
+          type: string
+          enum: [normal, urgent, emergency]
+        unitsNeeded:
+          type: integer
+        location:
+          type: object
+          properties:
+            lat:
+              type: number
+            lng:
+              type: number
+            address:
+              type: string
+        notes:
+          type: string
+
+    BloodRequestResponse:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        userId:
+          type: string
+        bloodGroup:
+          type: string
+        urgency:
+          type: string
+        unitsNeeded:
+          type: integer
+        status:
+          type: string
+          enum: [active, fulfilled, cancelled, expired]
+        createdAt:
+          type: string
+          format: date-time
+
+    SearchDonorsForRequestDto:
+      type: object
+      properties:
+        radiusKm:
+          type: number
+          default: 10
+
+    DonorSearchResult:
+      type: object
+      properties:
+        donorUuid:
+          type: string
+        bloodGroup:
+          type: string
+        distanceKm:
+          type: number
+        isEligible:
+          type: boolean
+
+    TriggerEmergencyAlertDto:
+      type: object
+      required:
+        - requestUuid
+      properties:
+        requestUuid:
+          type: string
+          format: uuid
+        idempotencyKey:
+          type: string
+
+    Badge:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        awardedAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    BadgeDefinition:
+      type: object
+      properties:
+        type:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        criteria:
+          type: object
+
+    CreateBusinessDto:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        address:
+          type: object
+
+    BusinessProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        ownerId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    SwitchBusinessModeDto:
+      type: object
+      required:
+        - mode
+      properties:
+        mode:
+          type: string
+          enum: [personal, business]

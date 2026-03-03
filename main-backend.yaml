@@ -1,0 +1,1817 @@
+openapi: 3.0.3
+info:
+  title: ClaverIT Main Backend API
+  version: 1.0.0
+  description: |
+    Core identity, authentication, users, admin, and personal mode APIs.
+    Handles auth flows, user management, business-admin oversight, and personal domain features.
+  contact:
+    name: ClaverIT Support
+    email: support@claverit.com
+
+servers:
+  - url: https://clever-it-hazel.vercel.app/api
+    description: Production
+
+tags:
+  - name: auth
+    description: Authentication endpoints (OTP, login, signup, logout)
+  - name: users
+    description: User profile and preferences management
+  - name: admin
+    description: Super admin oversight endpoints
+  - name: business-admin
+    description: Business admin user management and social proxies
+  - name: personal-relationships
+    description: Personal mode relationship management
+  - name: personal-calendar
+    description: Personal calendar events
+  - name: personal-communication
+    description: Personal communication preferences
+  - name: personal-identity
+    description: Personal identity verification
+  - name: personal-moderation
+    description: Personal moderation controls
+  - name: contacts
+    description: Contact book management
+  - name: caller-id
+    description: Caller ID lookup
+  - name: qr
+    description: QR code identity
+  - name: health
+    description: Health check endpoints
+
+paths:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Health
+  # ─────────────────────────────────────────────────────────────────────────────
+  /health:
+    get:
+      tags: [health]
+      operationId: AppController_health
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Auth
+  # ─────────────────────────────────────────────────────────────────────────────
+  /auth/send-otp:
+    post:
+      tags: [auth]
+      operationId: AuthController_sendOtp
+      summary: Send OTP to phone number
+      description: Rate limited to 3 requests per 60 seconds per phone number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendOtpDto'
+      responses:
+        '201':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendOtpResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /auth/verify-otp:
+    post:
+      tags: [auth]
+      operationId: AuthController_verifyOtp
+      summary: Verify OTP and login
+      description: Rate limited to 5 requests per 60 seconds. Sets httpOnly auth cookie.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOtpDto'
+      responses:
+        '200':
+          description: OTP verified, user logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/signup:
+    post:
+      tags: [auth]
+      operationId: AuthController_signup
+      summary: Sign up new user
+      description: OTP must be pre-sent. Rate limited to 5 requests per 60 seconds.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupDto'
+      responses:
+        '201':
+          description: User created and logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags: [auth]
+      operationId: AuthController_getProfile
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      operationId: AuthController_logout
+      summary: Logout and invalidate current token
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Logged out successfully
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Users
+  # ─────────────────────────────────────────────────────────────────────────────
+  /users/me:
+    get:
+      tags: [users]
+      operationId: UsersController_getMyProfile
+      summary: Get current authenticated user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      tags: [users]
+      operationId: UsersController_updateMe
+      summary: Update current user profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDto'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      tags: [users]
+      operationId: UsersController_deleteAccount
+      summary: Delete account (anonymize + soft-delete)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Account deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Account deleted and data anonymized successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/{id}:
+    get:
+      tags: [users]
+      operationId: UsersController_findOne
+      summary: Get user by ID (own profile only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    patch:
+      tags: [users]
+      operationId: UsersController_update
+      summary: Update user profile (deprecated — use PATCH /users/me)
+      deprecated: true
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDto'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /users/me/preferences:
+    get:
+      tags: [users]
+      operationId: UsersController_getMyPreferences
+      summary: Get current user UI/preferences state
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      tags: [users]
+      operationId: UsersController_updateMyPreferences
+      summary: Update current user UI/preferences state
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserPreferencesDto'
+      responses:
+        '200':
+          description: Preferences updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/me/profile-image:
+    patch:
+      tags: [users]
+      operationId: UsersController_updateProfileImage
+      summary: Upload or replace current user profile image
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Profile image file (max 5MB)
+              required:
+                - file
+      responses:
+        '200':
+          description: Profile image updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/deactivate:
+    post:
+      tags: [users]
+      operationId: UsersController_deactivate
+      summary: Deactivate current user account
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Account deactivated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/reactivate:
+    post:
+      tags: [users]
+      operationId: UsersController_reactivate
+      summary: Reactivate current user account
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Account reactivated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/me/caller-id-opt-out:
+    patch:
+      tags: [users]
+      operationId: UsersController_toggleCallerIdOptOut
+      summary: Toggle caller-ID visibility opt-out
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                optOut:
+                  type: boolean
+              required:
+                - optOut
+      responses:
+        '200':
+          description: Opt-out setting updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Admin (super_admin only)
+  # ─────────────────────────────────────────────────────────────────────────────
+  /admin/users/{id}/activity/schedules:
+    get:
+      tags: [admin]
+      operationId: AdminController_getUserSchedules
+      summary: Get aggregated user schedules (calendar + appointments)
+      description: Aggregates personal calendar events and appointment schedules for admin oversight. Requires super_admin role.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: User ID
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Aggregated schedules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AggregatedSchedules'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Business Admin
+  # ─────────────────────────────────────────────────────────────────────────────
+  /business-admin/users:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_listUsers
+      summary: List users under authenticated business-admin scope
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: accountStatus
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, deleted]
+      responses:
+        '200':
+          description: Scoped user list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/users/{id}/profile:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_getUserProfile
+      summary: Get scoped business user profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/users/{id}/activity/summary:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_getUserActivitySummary
+      summary: Get scoped business user activity summary
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Activity summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivitySummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/users/{id}/activity/login-logs:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_getUserLoginLogs
+      summary: Get scoped business user login logs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Login logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLoginLogs'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/users/{id}/status:
+    patch:
+      tags: [business-admin]
+      operationId: BusinessAdminController_setUserStatus
+      summary: Activate or deactivate scoped business user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isActive:
+                  type: boolean
+              required:
+                - isActive
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/dashboard:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_getDashboard
+      summary: Get business-admin dashboard (proxy to social domain)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/profile:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_getProfile
+      summary: Get business-admin profile (proxy to social domain)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Business profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    patch:
+      tags: [business-admin]
+      operationId: BusinessAdminController_updateProfile
+      summary: Update business-admin profile (proxy to social domain)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/services:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_listServices
+      summary: List business services (proxy to social domain)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Services list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BusinessService'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags: [business-admin]
+      operationId: BusinessAdminController_createService
+      summary: Create business service (proxy to social domain)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Service created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessService'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/services/{servicePublicId}:
+    patch:
+      tags: [business-admin]
+      operationId: BusinessAdminController_updateService
+      summary: Update business service (proxy to social domain)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: servicePublicId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Service updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessService'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    delete:
+      tags: [business-admin]
+      operationId: BusinessAdminController_deleteService
+      summary: Delete business service (proxy to social domain)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: servicePublicId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/customers:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_listCustomers
+      summary: List business customers (proxy to social domain)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Customers list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/customers/export:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_exportCustomersCsv
+      summary: Export customers as CSV (proxy to social domain)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/customers/{customerPublicId}/status:
+    patch:
+      tags: [business-admin]
+      operationId: BusinessAdminController_updateCustomerStatus
+      summary: Update customer status (proxy to social domain)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: customerPublicId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Status updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/revenue:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_getRevenue
+      summary: Get business revenue summary (proxy to social domain)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Revenue summary
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/revenue/appointments/{appointmentPublicId}/payment-status:
+    patch:
+      tags: [business-admin]
+      operationId: BusinessAdminController_updatePaymentStatus
+      summary: Update appointment payment status (proxy to social domain)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appointmentPublicId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Payment status updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/analytics:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_getAnalytics
+      summary: Get business analytics (proxy to social domain)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Analytics data
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/availability:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_getAvailability
+      summary: Get business availability (proxy to social domain)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Availability settings
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    patch:
+      tags: [business-admin]
+      operationId: BusinessAdminController_updateAvailability
+      summary: Update business availability (proxy to social domain)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Availability updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/communications/logs:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_listCommunicationLogs
+      summary: List communication logs (proxy to social domain)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Communication logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/communications/send:
+    post:
+      tags: [business-admin]
+      operationId: BusinessAdminController_sendCommunication
+      summary: Send communication (proxy to social domain)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Communication sent
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/members:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_listMembers
+      summary: List business members (proxy to social domain)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Members list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/members/invite:
+    post:
+      tags: [business-admin]
+      operationId: BusinessAdminController_inviteMember
+      summary: Invite member to business (proxy to social domain)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Invite sent
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/members/{memberPublicId}/role:
+    patch:
+      tags: [business-admin]
+      operationId: BusinessAdminController_updateMemberRole
+      summary: Update member role (proxy to social domain)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: memberPublicId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Role updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/activity-logs:
+    get:
+      tags: [business-admin]
+      operationId: BusinessAdminController_listActivityLogs
+      summary: List activity logs (proxy to social domain)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Activity logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /business-admin/invites/{invitePublicId}/accept:
+    post:
+      tags: [business-admin]
+      operationId: BusinessAdminController_acceptInvite
+      summary: Accept business invite (proxy to social domain)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: invitePublicId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Invite accepted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Personal Relationships
+  # ─────────────────────────────────────────────────────────────────────────────
+  /personal/relationships/request:
+    post:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_createRequest
+      summary: Create relationship request
+      description: Rate limited to 10 requests per 60 seconds
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRelationshipRequestDto'
+      responses:
+        '201':
+          description: Request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /personal/relationships/respond:
+    post:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_respond
+      summary: Respond to pending relationship request
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondRelationshipRequestDto'
+      responses:
+        '200':
+          description: Response recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/relationships/cancel:
+    patch:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_cancelRequest
+      summary: Cancel outgoing pending relationship request
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockRelationshipDto'
+      responses:
+        '200':
+          description: Request cancelled
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/relationships/remove:
+    patch:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_removeRelationship
+      summary: Remove accepted relationship
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockRelationshipDto'
+      responses:
+        '200':
+          description: Relationship removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/relationships/block:
+    patch:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_block
+      summary: Block relationship
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockRelationshipDto'
+      responses:
+        '200':
+          description: Relationship blocked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/relationships/unblock:
+    patch:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_unblock
+      summary: Unblock relationship
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockRelationshipDto'
+      responses:
+        '200':
+          description: Relationship unblocked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/relationships/tag:
+    patch:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_updateTag
+      summary: Update relationship tag
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRelationshipTagDto'
+      responses:
+        '200':
+          description: Tag updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/relationships/note:
+    patch:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_upsertNote
+      summary: Upsert private note for relationship
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationshipNoteDto'
+      responses:
+        '200':
+          description: Note saved
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/relationships/mine:
+    get:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_listMine
+      summary: List my relationships
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Relationships list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RelationshipResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/relationships/search-users:
+    get:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_searchUsers
+      summary: Search discoverable users for relationship requests
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserSearchResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/relationships/lookup-phone:
+    post:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_lookupByPhone
+      summary: Phone-based exact lookup with visibility enforcement
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhoneLookupDto'
+      responses:
+        '200':
+          description: Lookup result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSearchResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/relationships/eligibility:
+    get:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_checkEligibility
+      summary: Check if a target user is eligible for group membership
+      description: Returns eligibility status based on accepted relationship. Used by chat-backend for group member validation.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: targetUserId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Eligibility status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eligible:
+                    type: boolean
+                  reason:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/relationships/eligibility/bulk:
+    post:
+      tags: [personal-relationships]
+      operationId: RelationshipsController_bulkCheckEligibility
+      summary: Bulk check eligibility for multiple target users
+      description: Returns eligibility status for up to 50 target users. Rate limited to 20 requests per 60 seconds.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkCheckEligibilityDto'
+      responses:
+        '200':
+          description: Eligibility results
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    eligible:
+                      type: boolean
+                    reason:
+                      type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from auth/verify-otp or auth/signup
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    TooManyRequests:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Bad Request
+        error:
+          type: string
+          example: Validation failed
+
+    SendOtpDto:
+      type: object
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+          description: Phone number in E.164 format
+          example: '+919876543210'
+
+    SendOtpResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    VerifyOtpDto:
+      type: object
+      required:
+        - phone
+        - otp
+      properties:
+        phone:
+          type: string
+          example: '+919876543210'
+        otp:
+          type: string
+          example: '123456'
+
+    SignupDto:
+      type: object
+      required:
+        - phone
+        - otp
+        - fullName
+      properties:
+        phone:
+          type: string
+          example: '+919876543210'
+        otp:
+          type: string
+          example: '123456'
+        fullName:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          format: email
+
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        uuid:
+          type: string
+          format: uuid
+        phone:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [user, business_user, business_admin, super_admin]
+        mode:
+          type: string
+          enum: [personal, business, system]
+        businessId:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+        accountStatus:
+          type: string
+          enum: [active, inactive, deleted]
+        profileImage:
+          type: object
+          properties:
+            url:
+              type: string
+              nullable: true
+            updatedAt:
+              type: string
+              format: date-time
+              nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateUserDto:
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        bio:
+          type: string
+
+    UserPreferences:
+      type: object
+      properties:
+        theme:
+          type: string
+        notifications:
+          type: object
+        privacy:
+          type: object
+
+    UpdateUserPreferencesDto:
+      type: object
+      properties:
+        theme:
+          type: string
+        notifications:
+          type: object
+        privacy:
+          type: object
+
+    PaginatedUserList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserProfile'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    ActivitySummary:
+      type: object
+      properties:
+        totalLogins:
+          type: integer
+        lastLogin:
+          type: string
+          format: date-time
+        appointmentsCount:
+          type: integer
+
+    PaginatedLoginLogs:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              ipAddress:
+                type: string
+              userAgent:
+                type: string
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    AggregatedSchedules:
+      type: object
+      properties:
+        calendarEvents:
+          type: array
+          items:
+            type: object
+        appointments:
+          type: array
+          items:
+            type: object
+        total:
+          type: integer
+
+    BusinessProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        address:
+          type: object
+
+    BusinessService:
+      type: object
+      properties:
+        publicId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        duration:
+          type: integer
+        isActive:
+          type: boolean
+
+    CreateRelationshipRequestDto:
+      type: object
+      required:
+        - targetUserId
+      properties:
+        targetUserId:
+          type: string
+        message:
+          type: string
+
+    RespondRelationshipRequestDto:
+      type: object
+      required:
+        - requestId
+        - action
+      properties:
+        requestId:
+          type: string
+        action:
+          type: string
+          enum: [accept, reject]
+
+    BlockRelationshipDto:
+      type: object
+      required:
+        - targetUserId
+      properties:
+        targetUserId:
+          type: string
+
+    UpdateRelationshipTagDto:
+      type: object
+      required:
+        - targetUserId
+        - tag
+      properties:
+        targetUserId:
+          type: string
+        tag:
+          type: string
+
+    RelationshipNoteDto:
+      type: object
+      required:
+        - targetUserId
+        - note
+      properties:
+        targetUserId:
+          type: string
+        note:
+          type: string
+
+    PhoneLookupDto:
+      type: object
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+
+    BulkCheckEligibilityDto:
+      type: object
+      required:
+        - targetUserIds
+      properties:
+        targetUserIds:
+          type: array
+          items:
+            type: string
+          maxItems: 50
+
+    RelationshipResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [pending, accepted, rejected, blocked, removed]
+        initiatorId:
+          type: string
+        targetId:
+          type: string
+        tag:
+          type: string
+        note:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    UserSearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+        uuid:
+          type: string
+        fullName:
+          type: string
+        profileImageUrl:
+          type: string
+          nullable: true
+        relationshipStatus:
+          type: string
+          nullable: true

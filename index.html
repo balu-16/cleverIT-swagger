@@ -3,8 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NighaTech API Documentation</title>
+  <title>ClaverIT API Documentation</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
+  <style>
+    .topbar-wrapper { display: flex; align-items: center; }
+    .topbar-wrapper .link { display: flex; align-items: center; }
+    .topbar-wrapper img { height: 40px; }
+    .info .title { font-size: 2rem !important; }
+    .swagger-ui .info { margin: 30px 0; }
+    .ws-link {
+      display: inline-block;
+      margin: 10px 0;
+      padding: 8px 16px;
+      background: #61affe;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .ws-link:hover { background: #4a9ae8; }
+    .internal-warning {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 10px 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
   <div id="swagger-ui"></div>
@@ -13,26 +39,22 @@
   <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
   <script>
     window.onload = () => {
-      const host = window.location.hostname;
-      const isLocalhost = host === "localhost" || host === "127.0.0.1";
-      const gatewayOrigin = window.location.origin;
-      const serviceSpecs = isLocalhost
-        ? [
-            { name: "core", url: "http://localhost:3000/api/docs-json" },
-            { name: "social", url: "http://localhost:3003/api/docs-json" },
-            { name: "notify", url: "http://localhost:3002/api/docs-json" }
-          ]
-        : [
-            { name: "core", url: `${gatewayOrigin}/api/docs-json` },
-            { name: "social", url: `${gatewayOrigin}/social/docs-json` },
-            { name: "notify", url: `${gatewayOrigin}/notify/docs-json` }
-          ];
+      const basePath = window.location.pathname.replace(/\/index\.html$/, '').replace(/\/$/, '');
+      
+      const serviceSpecs = [
+        { name: "Main Backend", url: `${basePath}/main-backend.yaml` },
+        { name: "Social", url: `${basePath}/social.yaml` },
+        { name: "Notify", url: `${basePath}/notify.yaml` },
+        { name: "Chat", url: `${basePath}/chat.yaml` },
+        { name: "ONDC", url: `${basePath}/ondc.yaml` },
+        { name: "Internal (Private)", url: `${basePath}/internal.yaml` }
+      ];
 
       window.ui = SwaggerUIBundle({
         urls: serviceSpecs,
-        "urls.primaryName": "core",
+        "urls.primaryName": "Main Backend",
         dom_id: "#swagger-ui",
-        deepLinking: false,
+        deepLinking: true,
         presets: [
           SwaggerUIBundle.presets.apis,
           SwaggerUIStandalonePreset
@@ -47,8 +69,27 @@
         persistAuthorization: true,
         defaultModelsExpandDepth: 1,
         tagsSorter: "alpha",
-        operationsSorter: "method"
+        operationsSorter: "method",
+        onComplete: function() {
+          const infoContainer = document.querySelector('.information-container');
+          if (infoContainer) {
+            const wsLink = document.createElement('a');
+            wsLink.href = `${basePath}/websocket.md`;
+            wsLink.target = '_blank';
+            wsLink.className = 'ws-link';
+            wsLink.textContent = '📡 WebSocket Protocol Documentation';
+            infoContainer.appendChild(wsLink);
+          }
+        }
       });
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('spec') === 'internal') {
+        const warning = document.createElement('div');
+        warning.className = 'internal-warning';
+        warning.innerHTML = '⚠️ <strong>Internal APIs</strong> - These endpoints are for service-to-service communication only. Do not expose to end users.';
+        document.body.insertBefore(warning, document.getElementById('swagger-ui'));
+      }
     };
   </script>
 </body>
