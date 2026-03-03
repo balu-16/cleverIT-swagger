@@ -1429,6 +1429,726 @@ paths:
         '429':
           $ref: '#/components/responses/TooManyRequests'
 
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Caller ID
+  # ─────────────────────────────────────────────────────────────────────────────
+  /caller-id/resolve/{phone}:
+    get:
+      tags: [caller-id]
+      operationId: CallerIdController_resolve
+      summary: Resolve phone number to display name
+      description: Rate limited to 60 requests per 60 seconds
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: phone
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resolved caller info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallerIdResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /caller-id/resolve/batch:
+    post:
+      tags: [caller-id]
+      operationId: CallerIdController_resolveBatch
+      summary: Batch resolve phone numbers (max 50)
+      description: Rate limited to 10 requests per 60 seconds
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchResolveDto'
+      responses:
+        '200':
+          description: Batch resolved results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CallerIdResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /caller-id/profile/{phone}:
+    get:
+      tags: [caller-id]
+      operationId: CallerIdController_getPublicProfile
+      summary: Get public user profile by phone number
+      description: Excludes Aadhaar and sensitive data. Rate limited to 30 requests per 60 seconds.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: phone
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Public profile returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  found:
+                    type: boolean
+                  profile:
+                    $ref: '#/components/schemas/PublicProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Contacts
+  # ─────────────────────────────────────────────────────────────────────────────
+  /contacts/upload:
+    post:
+      tags: [contacts]
+      operationId: ContactsController_uploadContacts
+      summary: Upload contact intelligence (consent required)
+      description: Rate limited to 3 requests per hour
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadContactsDto'
+      responses:
+        '200':
+          description: Contacts uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  uploadedCount:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /contacts/consent:
+    post:
+      tags: [contacts]
+      operationId: ContactsController_grantConsent
+      summary: Grant contact sharing consent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrantConsentDto'
+      responses:
+        '200':
+          description: Consent granted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      tags: [contacts]
+      operationId: ContactsController_revokeConsent
+      summary: Revoke contact sharing consent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeConsentDto'
+      responses:
+        '200':
+          description: Consent revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /contacts/consent/status:
+    get:
+      tags: [contacts]
+      operationId: ContactsController_getConsentStatus
+      summary: Check current consent status
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Consent status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Personal Calendar
+  # ─────────────────────────────────────────────────────────────────────────────
+  /personal/calendar/events:
+    post:
+      tags: [personal-calendar]
+      operationId: CalendarController_createEvent
+      summary: Create personal calendar event
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePersonalEventDto'
+      responses:
+        '201':
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalEvent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    get:
+      tags: [personal-calendar]
+      operationId: CalendarController_listEvents
+      summary: List personal calendar events for a date range
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Events list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonalEvent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/calendar/events/{eventId}/rsvp:
+    patch:
+      tags: [personal-calendar]
+      operationId: CalendarController_respondRsvp
+      summary: Respond to personal calendar event RSVP
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondRsvpDto'
+      responses:
+        '200':
+          description: RSVP recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalEvent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/calendar/events/{eventId}/reminders:
+    post:
+      tags: [personal-calendar]
+      operationId: CalendarController_scheduleReminder
+      summary: Schedule reminder for an owned personal calendar event
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleReminderDto'
+      responses:
+        '200':
+          description: Reminder scheduled
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/calendar/events/{eventId}/cancel-occurrence:
+    patch:
+      tags: [personal-calendar]
+      operationId: CalendarController_cancelOccurrence
+      summary: Cancel a single occurrence of an owned personal calendar event
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelOccurrenceDto'
+      responses:
+        '200':
+          description: Occurrence cancelled
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/calendar/events/{eventId}:
+    delete:
+      tags: [personal-calendar]
+      operationId: CalendarController_deleteEvent
+      summary: Delete an owned personal calendar event
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Personal Communication
+  # ─────────────────────────────────────────────────────────────────────────────
+  /personal/communication/availability:
+    patch:
+      tags: [personal-communication]
+      operationId: CommunicationController_updateAvailability
+      summary: Update my personal communication availability
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAvailabilityDto'
+      responses:
+        '200':
+          description: Availability updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunicationAvailability'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    get:
+      tags: [personal-communication]
+      operationId: CommunicationController_getAvailabilityForUsers
+      summary: Lookup availability for user identifiers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userIdentifiers
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Comma-separated list of user identifiers
+      responses:
+        '200':
+          description: Availability lookup results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunicationAvailability'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [personal-communication]
+      operationId: CommunicationController_getAvailabilityForUsersFromBody
+      summary: Lookup availability for user identifiers (body payload)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userIdentifiers:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Availability lookup results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunicationAvailability'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/communication/availability/me:
+    get:
+      tags: [personal-communication]
+      operationId: CommunicationController_getMyAvailability
+      summary: Get my personal communication availability
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: My availability
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunicationAvailability'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      tags: [personal-communication]
+      operationId: CommunicationController_updateAvailabilityAlias
+      summary: Update my personal communication availability (alias)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAvailabilityDto'
+      responses:
+        '200':
+          description: Availability updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunicationAvailability'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/communication/missed-interaction:
+    post:
+      tags: [personal-communication]
+      operationId: CommunicationController_logMissedInteraction
+      summary: Log personal missed interaction metadata
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogMissedInteractionDto'
+      responses:
+        '200':
+          description: Missed interaction logged
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/communication/calls/start:
+    post:
+      tags: [personal-communication]
+      operationId: CommunicationController_startCall
+      summary: Create personal call metadata record
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartPersonalCallDto'
+      responses:
+        '200':
+          description: Call record created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  callId:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/communication/calls/end:
+    post:
+      tags: [personal-communication]
+      operationId: CommunicationController_endCall
+      summary: End personal call metadata record
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EndPersonalCallDto'
+      responses:
+        '200':
+          description: Call record ended
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Personal Identity
+  # ─────────────────────────────────────────────────────────────────────────────
+  /personal/profile/me:
+    get:
+      tags: [personal-identity]
+      operationId: IdentityController_getMyProfile
+      summary: Get current user personal-mode profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Personal profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      tags: [personal-identity]
+      operationId: IdentityController_updateMyProfile
+      summary: Partially update current user personal-mode profile
+      description: Rate limited to 15 requests per 60 seconds
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePersonalProfileDto'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Personal Moderation
+  # ─────────────────────────────────────────────────────────────────────────────
+  /personal/moderation/block:
+    post:
+      tags: [personal-moderation]
+      operationId: ModerationController_blockUser
+      summary: Block a user in personal mode
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockUserDto'
+      responses:
+        '200':
+          description: User blocked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/moderation/unblock:
+    post:
+      tags: [personal-moderation]
+      operationId: ModerationController_unblockUser
+      summary: Unblock a previously blocked user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnblockUserDto'
+      responses:
+        '200':
+          description: User unblocked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/moderation/report:
+    post:
+      tags: [personal-moderation]
+      operationId: ModerationController_reportUser
+      summary: Report a user for abuse/spam
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportUserDto'
+      responses:
+        '200':
+          description: Report submitted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/moderation/state:
+    get:
+      tags: [personal-moderation]
+      operationId: ModerationController_getState
+      summary: Get current user moderation state
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Moderation state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModerationState'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /personal/moderation/shadow-ban:
+    patch:
+      tags: [personal-moderation]
+      operationId: ModerationController_shadowBan
+      summary: Admin-only shadow-ban toggle
+      description: Requires super_admin role
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - targetUserId
+                - enabled
+              properties:
+                targetUserId:
+                  type: string
+                enabled:
+                  type: boolean
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Shadow-ban toggled
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # QR Code Identity
+  # ─────────────────────────────────────────────────────────────────────────────
+  /qr/me:
+    get:
+      tags: [qr]
+      operationId: QrController_getMyQr
+      summary: Get own QR token and public profile preview
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: QR token and profile preview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QrTokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /qr/resolve/{token}:
+    get:
+      tags: [qr]
+      operationId: QrController_resolveQr
+      summary: Resolve QR token to public user profile
+      description: Rate limited to 20 requests per 60 seconds
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resolved profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1815,3 +2535,336 @@ components:
         relationshipStatus:
           type: string
           nullable: true
+
+    CallerIdResult:
+      type: object
+      properties:
+        phone:
+          type: string
+        displayName:
+          type: string
+          nullable: true
+        found:
+          type: boolean
+
+    BatchResolveDto:
+      type: object
+      required:
+        - phones
+      properties:
+        phones:
+          type: array
+          items:
+            type: string
+          maxItems: 50
+
+    PublicProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        profileImageUrl:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+
+    UploadContactsDto:
+      type: object
+      required:
+        - contacts
+      properties:
+        contacts:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              phone:
+                type: string
+
+    GrantConsentDto:
+      type: object
+      required:
+        - consentType
+      properties:
+        consentType:
+          type: string
+          enum: [contact_sharing, caller_id]
+
+    RevokeConsentDto:
+      type: object
+      required:
+        - consentType
+      properties:
+        consentType:
+          type: string
+          enum: [contact_sharing, caller_id]
+
+    ConsentStatus:
+      type: object
+      properties:
+        contactSharing:
+          type: boolean
+        callerId:
+          type: boolean
+        grantedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    CreatePersonalEventDto:
+      type: object
+      required:
+        - title
+        - startTime
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        isAllDay:
+          type: boolean
+        recurrence:
+          type: object
+          properties:
+            frequency:
+              type: string
+              enum: [daily, weekly, monthly, yearly]
+            interval:
+              type: integer
+            endDate:
+              type: string
+              format: date
+        invitees:
+          type: array
+          items:
+            type: string
+
+    PersonalEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        isAllDay:
+          type: boolean
+        ownerId:
+          type: string
+        rsvpStatus:
+          type: string
+          enum: [pending, accepted, declined, maybe]
+        createdAt:
+          type: string
+          format: date-time
+
+    RespondRsvpDto:
+      type: object
+      required:
+        - response
+      properties:
+        response:
+          type: string
+          enum: [accepted, declined, maybe]
+
+    ScheduleReminderDto:
+      type: object
+      required:
+        - reminderTime
+      properties:
+        reminderTime:
+          type: string
+          format: date-time
+
+    CancelOccurrenceDto:
+      type: object
+      required:
+        - occurrenceDate
+      properties:
+        occurrenceDate:
+          type: string
+          format: date
+
+    UpdateAvailabilityDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [available, busy, away, dnd]
+        statusMessage:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    CommunicationAvailability:
+      type: object
+      properties:
+        userId:
+          type: string
+        status:
+          type: string
+          enum: [available, busy, away, dnd, offline]
+        statusMessage:
+          type: string
+          nullable: true
+        lastSeen:
+          type: string
+          format: date-time
+          nullable: true
+
+    LogMissedInteractionDto:
+      type: object
+      required:
+        - targetUserId
+        - type
+      properties:
+        targetUserId:
+          type: string
+        type:
+          type: string
+          enum: [call, message]
+        timestamp:
+          type: string
+          format: date-time
+
+    StartPersonalCallDto:
+      type: object
+      required:
+        - targetUserId
+      properties:
+        targetUserId:
+          type: string
+        callType:
+          type: string
+          enum: [voice, video]
+
+    EndPersonalCallDto:
+      type: object
+      required:
+        - callId
+      properties:
+        callId:
+          type: string
+        duration:
+          type: integer
+          description: Call duration in seconds
+        endReason:
+          type: string
+          enum: [completed, missed, declined, failed]
+
+    PersonalProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        uuid:
+          type: string
+        fullName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        bio:
+          type: string
+        profileImageUrl:
+          type: string
+          nullable: true
+        bloodGroup:
+          type: string
+          nullable: true
+        emergencyContacts:
+          type: array
+          items:
+            type: object
+
+    UpdatePersonalProfileDto:
+      type: object
+      properties:
+        fullName:
+          type: string
+        bio:
+          type: string
+        bloodGroup:
+          type: string
+        emergencyContacts:
+          type: array
+          items:
+            type: object
+
+    BlockUserDto:
+      type: object
+      required:
+        - targetUserId
+      properties:
+        targetUserId:
+          type: string
+        reason:
+          type: string
+
+    UnblockUserDto:
+      type: object
+      required:
+        - targetUserId
+      properties:
+        targetUserId:
+          type: string
+
+    ReportUserDto:
+      type: object
+      required:
+        - targetUserId
+        - reason
+      properties:
+        targetUserId:
+          type: string
+        reason:
+          type: string
+          enum: [spam, harassment, inappropriate_content, impersonation, other]
+        details:
+          type: string
+
+    ModerationState:
+      type: object
+      properties:
+        blockedUsers:
+          type: array
+          items:
+            type: string
+        blockedByCount:
+          type: integer
+        isShadowBanned:
+          type: boolean
+        reportCount:
+          type: integer
+
+    QrTokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        profile:
+          $ref: '#/components/schemas/PublicProfile'
